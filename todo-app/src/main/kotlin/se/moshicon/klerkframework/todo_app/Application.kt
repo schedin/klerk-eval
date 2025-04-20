@@ -2,9 +2,14 @@ package se.moshicon.klerkframework.todo_app
 
 import dev.klerkframework.klerk.*
 import dev.klerkframework.klerk.collection.ModelCollections
+import dev.klerkframework.klerk.datatypes.BooleanContainer
+import dev.klerkframework.klerk.datatypes.StringContainer
 import dev.klerkframework.klerk.statemachine.stateMachine
+import dev.klerkframework.klerk.storage.Persistence
+import dev.klerkframework.klerk.storage.SqlPersistence
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
+import org.sqlite.SQLiteDataSource
 import java.util.*
 
 class Ctx(
@@ -15,11 +20,34 @@ class Ctx(
 ) : KlerkContext
 
 data class Todo(
-    val id: UUID,
-    val title: String,
-    val description: String,
-    val completed: Boolean
+    val todoID: TodoID,
+    val title: TodoTitle,
+    val description: TodoDescription,
+    val completed: TodoCompletedStatus
 )
+
+class TodoID(value: String) : StringContainer(value) {
+    override val minLength = 36
+    override val maxLength = 36
+    override val maxLines = 1
+}
+
+class TodoTitle(value: String) : StringContainer(value) {
+    override val minLength = 0
+    override val maxLength = 100
+    override val maxLines = 1
+}
+
+class TodoDescription(value: String) : StringContainer(value) {
+    override val minLength = 0
+    override val maxLength = 100000
+    override val maxLines = Int.MAX_VALUE
+}
+
+sealed class TodoCompletedStatus(value: Boolean) : BooleanContainer(value)
+
+//object TodoIsCompleted : TodoCompletedStatus(true)
+object TodoIsNotCompleted : TodoCompletedStatus(false)
 
 object Data {
     val todos = ModelCollections<Todo, Ctx>()
@@ -30,6 +58,10 @@ enum class TodoStates {
 }
 
 val todoStateMachine = stateMachine {
+    event(CreateTodo) {
+
+    }
+
     voidState {
         onEvent(CreateTodo) {
             createModel(TodoStates.Created, ::createTodo)
@@ -38,15 +70,25 @@ val todoStateMachine = stateMachine {
 }
 
 object CreateTodo : VoidEventWithParameters<Todo, CreateTodoParams>(Todo::class, true, CreateTodoParams::class)
-class CreateTodoParams(val title: String, val description: String)
+class CreateTodoParams(val title: TodoTitle, val description: TodoDescription)
 fun createTodo(args: ArgForVoidEvent<Todo, CreateTodoParams, Ctx, Data>): Todo {
-    return Todo(id = UUID.randomUUID(), title = args.command.params.title, description = args.command.params.description, completed = false)
+    return Todo(
+        todoID = TodoID(UUID.randomUUID().toString()),
+        title = args.command.params.title,
+        description = args.command.params.description,
+        completed = TodoIsNotCompleted)
+}
+
+private fun createPersistence(): Persistence {
+    val dbFilePath =
+        requireNotNull(System.getenv("DATABASE_PATH")) { "The environment variable 'DATABASE_PATH' must be set" }
+    val ds =  SQLiteDataSource()
+    ds.url = "jdbc:sqlite:$dbFilePath"
+    return SqlPersistence(ds)
 }
 
 
 fun main() {
-    println("Hello, Klerk Framework")
-
     val config = ConfigBuilder<Ctx, Data>(Data).build {
         authorization {
             apply(insecureAllowEverything())
@@ -54,6 +96,7 @@ fun main() {
         managedModels {
             model(Todo::class, todoStateMachine, Data.todos)
         }
+        persistence(createPersistence())
     }
 
     val klerk = Klerk.create(config)
