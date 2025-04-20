@@ -1,4 +1,5 @@
 val klerk_version: String by project
+val logback_version: String by project
 
 plugins {
     kotlin("jvm") version "2.1.10"
@@ -18,6 +19,7 @@ application {
 
 dependencies {
     implementation("com.github.klerk-framework:klerk:$klerk_version")
+    implementation("ch.qos.logback:logback-classic:$logback_version")
     testImplementation(kotlin("test"))
 }
 
