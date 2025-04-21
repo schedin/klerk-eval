@@ -102,7 +102,6 @@ private fun createPersistence(): Persistence {
     return SqlPersistence(ds)
 }
 
-
 fun main() {
     val config = ConfigBuilder<Ctx, Data>(Data).build {
         authorization {
