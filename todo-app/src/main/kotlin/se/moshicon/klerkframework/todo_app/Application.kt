@@ -2,6 +2,9 @@ package se.moshicon.klerkframework.todo_app
 
 import dev.klerkframework.klerk.*
 import dev.klerkframework.klerk.collection.ModelCollections
+import dev.klerkframework.klerk.command.Command
+import dev.klerkframework.klerk.command.CommandToken
+import dev.klerkframework.klerk.command.ProcessingOptions
 import dev.klerkframework.klerk.datatypes.BooleanContainer
 import dev.klerkframework.klerk.datatypes.StringContainer
 import dev.klerkframework.klerk.statemachine.stateMachine
@@ -10,7 +13,9 @@ import dev.klerkframework.klerk.storage.SqlPersistence
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import org.sqlite.SQLiteDataSource
+import kotlinx.coroutines.runBlocking
 import java.util.*
+import se.moshicon.klerkframework.todo_app.TodoStates.*
 
 class Ctx(
     override val actor: ActorIdentity,
@@ -44,18 +49,24 @@ class TodoDescription(value: String) : StringContainer(value) {
     override val maxLines = Int.MAX_VALUE
 }
 
-sealed class TodoCompletedStatus(value: Boolean) : BooleanContainer(value)
 
-//object TodoIsCompleted : TodoCompletedStatus(true)
-object TodoIsNotCompleted : TodoCompletedStatus(false)
+class TodoCompletedStatus constructor(value: Boolean) : BooleanContainer(value) {
+
+}
+//sealed class TodoCompletedStatus protected constructor(value: Boolean) : BooleanContainer(value)
+//
+////object TodoIsCompleted : TodoCompletedStatus(true)
+//object TodoIsNotCompleted : TodoCompletedStatus(false)
+//
+enum class TodoStates {
+    Created
+}
+
 
 object Data {
     val todos = ModelCollections<Todo, Ctx>()
 }
 
-enum class TodoStates {
-    Created
-}
 
 val todoStateMachine = stateMachine {
     event(CreateTodo) {
@@ -64,8 +75,11 @@ val todoStateMachine = stateMachine {
 
     voidState {
         onEvent(CreateTodo) {
-            createModel(TodoStates.Created, ::createTodo)
+            createModel(Created, ::createTodo)
         }
+    }
+
+    state(Created) {
     }
 }
 
@@ -76,7 +90,8 @@ fun createTodo(args: ArgForVoidEvent<Todo, CreateTodoParams, Ctx, Data>): Todo {
         todoID = TodoID(UUID.randomUUID().toString()),
         title = args.command.params.title,
         description = args.command.params.description,
-        completed = TodoIsNotCompleted)
+        completed = TodoCompletedStatus(false)
+    )
 }
 
 private fun createPersistence(): Persistence {
@@ -100,5 +115,23 @@ fun main() {
     }
 
     val klerk = Klerk.create(config)
-    println(klerk)
+    runBlocking {
+        klerk.meta.start()
+        if (klerk.meta.modelsCount == 0) {
+            createInitialTodo(klerk)
+        }
+
+    }
+}
+
+suspend fun createInitialTodo(klerk: Klerk<Ctx, Data>) {
+    val commandCreateAlice = Command(
+        event = CreateTodo,
+        model = null,
+        params = CreateTodoParams(
+            title = TodoTitle("Todo 1"),
+            description = TodoDescription("This is the first todo")
+        ),
+    )
+    klerk.handle(commandCreateAlice, Ctx(SystemIdentity), ProcessingOptions(CommandToken.simple()))
 }
