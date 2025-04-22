@@ -16,6 +16,7 @@ import org.sqlite.SQLiteDataSource
 import kotlinx.coroutines.runBlocking
 import java.util.*
 import se.moshicon.klerkframework.todo_app.TodoStates.*
+import kotlin.time.Duration.Companion.days
 
 class Ctx(
     override val actor: ActorIdentity,
@@ -49,17 +50,17 @@ class TodoDescription(value: String) : StringContainer(value) {
     override val maxLines = Int.MAX_VALUE
 }
 
-
 class TodoCompletedStatus constructor(value: Boolean) : BooleanContainer(value) {
-
 }
 //sealed class TodoCompletedStatus protected constructor(value: Boolean) : BooleanContainer(value)
 //
 ////object TodoIsCompleted : TodoCompletedStatus(true)
 //object TodoIsNotCompleted : TodoCompletedStatus(false)
-//
+
+
 enum class TodoStates {
-    Created
+    Created,
+    Trashed,
 }
 
 
@@ -81,6 +82,15 @@ val todoStateMachine = stateMachine {
 
     state(Created) {
     }
+    state(Trashed) {
+        atTime(::autoDeleteTodoInTrashTime) {
+            delete()
+        }
+    }
+}
+
+fun autoDeleteTodoInTrashTime(args: ArgForInstanceNonEvent<Todo, Ctx, Data>): Instant {
+    return args.time.plus(30.days)
 }
 
 object CreateTodo : VoidEventWithParameters<Todo, CreateTodoParams>(Todo::class, true, CreateTodoParams::class)
