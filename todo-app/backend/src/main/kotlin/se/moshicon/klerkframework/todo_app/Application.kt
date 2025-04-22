@@ -6,6 +6,7 @@ import dev.klerkframework.klerk.command.Command
 import dev.klerkframework.klerk.command.CommandToken
 import dev.klerkframework.klerk.command.ProcessingOptions
 import dev.klerkframework.klerk.datatypes.BooleanContainer
+import dev.klerkframework.klerk.datatypes.IntContainer
 import dev.klerkframework.klerk.datatypes.StringContainer
 import dev.klerkframework.klerk.statemachine.stateMachine
 import dev.klerkframework.klerk.storage.Persistence
@@ -33,8 +34,14 @@ data class Todo(
     val todoID: TodoID,
     val title: TodoTitle,
     val description: TodoDescription,
-    val completed: TodoCompletedStatus
+    val completed: TodoCompletedStatus,
+//    val priority: TodoPriority,
 )
+
+class TodoPriority(value: Int) : IntContainer(value) {
+    override val min = 0
+    override val max = 10
+}
 
 class TodoID(value: String) : StringContainer(value) {
     override val minLength = 36
@@ -61,7 +68,6 @@ class TodoCompletedStatus constructor(value: Boolean) : BooleanContainer(value) 
 ////object TodoIsCompleted : TodoCompletedStatus(true)
 //object TodoIsNotCompleted : TodoCompletedStatus(false)
 
-
 enum class TodoStates {
     Created,
     Trashed,
@@ -71,7 +77,6 @@ enum class TodoStates {
 object Data {
     val todos = ModelCollections<Todo, Ctx>()
 }
-
 
 val todoStateMachine = stateMachine {
     event(CreateTodo) {
@@ -110,7 +115,8 @@ fun createTodo(args: ArgForVoidEvent<Todo, CreateTodoParams, Ctx, Data>): Todo {
         todoID = TodoID(UUID.randomUUID().toString()),
         title = args.command.params.title,
         description = args.command.params.description,
-        completed = TodoCompletedStatus(false)
+        completed = TodoCompletedStatus(false),
+//        priority = TodoPriority(2),
     )
 }
 
@@ -133,6 +139,9 @@ fun main() {
             model(Todo::class, todoStateMachine, Data.todos)
         }
         persistence(createPersistence())
+        migrations(setOf(
+//            MyMigrationStep1to2
+        ))
     }
 
     val klerk = Klerk.create(config)
@@ -141,9 +150,7 @@ fun main() {
         if (klerk.meta.modelsCount == 0) {
             createInitialTodo(klerk)
         }
-        embeddedServer(Netty, port = 8080, host = "0.0.0.0", module = {
-            configureRouting(klerk)
-        }).start(wait = true)
+
 //        //Find the initial todo and print it
 //        val todo = klerk.read(Ctx(SystemIdentity)) {
 //            getFirstWhere(data.todos.all) { it.props.title == TodoTitle("Todo 1") }
@@ -153,6 +160,9 @@ fun main() {
 //        moveTodoToTrash(klerk, todo)
 
     }
+    embeddedServer(Netty, port = 8080, host = "0.0.0.0", module = {
+        configureRouting(klerk)
+    }).start(wait = true)
     //Thread.sleep(10.minutes.inWholeMilliseconds)
 }
 
