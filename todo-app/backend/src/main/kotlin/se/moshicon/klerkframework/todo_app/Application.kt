@@ -10,6 +10,8 @@ import dev.klerkframework.klerk.datatypes.StringContainer
 import dev.klerkframework.klerk.statemachine.stateMachine
 import dev.klerkframework.klerk.storage.Persistence
 import dev.klerkframework.klerk.storage.SqlPersistence
+import io.ktor.server.engine.*
+import io.ktor.server.netty.*
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import org.sqlite.SQLiteDataSource
@@ -17,6 +19,8 @@ import kotlinx.coroutines.runBlocking
 import java.util.*
 import se.moshicon.klerkframework.todo_app.TodoStates.*
 import kotlin.time.Duration.Companion.days
+import kotlin.time.Duration.Companion.minutes
+
 
 class Ctx(
     override val actor: ActorIdentity,
@@ -71,8 +75,10 @@ object Data {
 
 val todoStateMachine = stateMachine {
     event(CreateTodo) {
-
     }
+    event(MoveToTrash) {
+    }
+
 
     voidState {
         onEvent(CreateTodo) {
@@ -81,6 +87,9 @@ val todoStateMachine = stateMachine {
     }
 
     state(Created) {
+        onEvent(MoveToTrash) {
+            transitionTo(Trashed)
+        }
     }
     state(Trashed) {
         atTime(::autoDeleteTodoInTrashTime) {
@@ -90,7 +99,8 @@ val todoStateMachine = stateMachine {
 }
 
 fun autoDeleteTodoInTrashTime(args: ArgForInstanceNonEvent<Todo, Ctx, Data>): Instant {
-    return args.time.plus(30.days)
+    //return args.time.plus(30.days)
+    return args.time.plus(1.minutes)
 }
 
 object CreateTodo : VoidEventWithParameters<Todo, CreateTodoParams>(Todo::class, true, CreateTodoParams::class)
@@ -103,6 +113,8 @@ fun createTodo(args: ArgForVoidEvent<Todo, CreateTodoParams, Ctx, Data>): Todo {
         completed = TodoCompletedStatus(false)
     )
 }
+
+object MoveToTrash : InstanceEventNoParameters<Todo>(Todo::class, true)
 
 private fun createPersistence(): Persistence {
     val dbFilePath =
@@ -129,12 +141,32 @@ fun main() {
         if (klerk.meta.modelsCount == 0) {
             createInitialTodo(klerk)
         }
+        embeddedServer(Netty, port = 8080, host = "0.0.0.0", module = {
+            configureRouting(klerk)
+        }).start(wait = true)
+//        //Find the initial todo and print it
+//        val todo = klerk.read(Ctx(SystemIdentity)) {
+//            getFirstWhere(data.todos.all) { it.props.title == TodoTitle("Todo 1") }
+//        }
+//
+//        println(todo)
+//        moveTodoToTrash(klerk, todo)
 
     }
+    //Thread.sleep(10.minutes.inWholeMilliseconds)
+}
+
+suspend fun moveTodoToTrash(klerk: Klerk<Ctx, Data>, todo: Model<Todo>) {
+    val command = Command(
+        event = MoveToTrash,
+        model = todo.id,
+        params = null
+    )
+    klerk.handle(command, Ctx(SystemIdentity), ProcessingOptions(CommandToken.simple()))
 }
 
 suspend fun createInitialTodo(klerk: Klerk<Ctx, Data>) {
-    val commandCreateAlice = Command(
+    val command = Command(
         event = CreateTodo,
         model = null,
         params = CreateTodoParams(
@@ -142,5 +174,5 @@ suspend fun createInitialTodo(klerk: Klerk<Ctx, Data>) {
             description = TodoDescription("This is the first todo")
         ),
     )
-    klerk.handle(commandCreateAlice, Ctx(SystemIdentity), ProcessingOptions(CommandToken.simple()))
+    klerk.handle(command, Ctx(SystemIdentity), ProcessingOptions(CommandToken.simple()))
 }
