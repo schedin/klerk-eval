@@ -17,12 +17,13 @@ fun Application.configureRouting(klerk: Klerk<Ctx, Data>) {
         contextProvider = ::contextFromCall,
         showOptionalParameters = ::showOptionalParameters,
         cssPath = "https://unpkg.com/almond.css@latest/dist/almond.min.css",
-//        knownAlgorithms = setOf(IsAutomaticDraw)
     )
 
     routing {
         route("/api") {
-            get("/todos") { getTodos(call, klerk) }
+            get("/todos") {
+                getTodos(call, klerk)
+            }
         }
 
         // The auto-generated Admin UI
@@ -33,30 +34,11 @@ fun Application.configureRouting(klerk: Klerk<Ctx, Data>) {
 
 internal fun showOptionalParameters(event: EventReference) = false
 
-
-//suspend fun ApplicationCall.context(klerk: Klerk<Ctx, Data>): Ctx {
-//    return Ctx(SystemIdentity)
-//}
 /**
  * Creates a Context from a Call.
  * As authentication is something that should not be handled by Klerk, we will just fake it here.
  */
-suspend fun ApplicationCall.context(klerk: Klerk<Ctx, Data>): Ctx {
-//    return Ctx(val user = klerk.read(Ctx(SystemIdentity)) {
-//        getFirstWhere(data.users.all) { it.props.name.valueWithoutAuthorization == "Alice" }
-//    }
+fun ApplicationCall.context(klerk: Klerk<Ctx, Data>): Ctx {
     return Ctx(SystemIdentity)
 }
 
-///**
-// * Creates a Context from a GraphQLContext. Used in the GraphQL API.
-// *
-// * In a real app we would use a session token or similar to figure out who the user is. Here, we always just use the
-// * user Alice.
-// */
-//suspend fun GraphQLContext.context(klerk: Klerk<Ctx, Collections>): Ctx {
-//    val user = klerk.read(Ctx.system()) {
-//        getFirstWhere(data.users.all) { it.props.name.valueWithoutAuthorization == "Alice" }
-//    }
-//    return Ctx.fromUser(user)
-//}
