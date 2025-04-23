@@ -9,6 +9,7 @@ import dev.klerkframework.web.LowCodeMain
 import io.ktor.server.application.*
 import io.ktor.server.routing.*
 import se.moshicon.klerkframework.todo_app.httpapi.getTodos
+import se.moshicon.klerkframework.todo_app.httpapi.createTodo
 
 fun Application.configureRouting(klerk: Klerk<Ctx, Data>) {
     suspend fun contextFromCall(call: ApplicationCall): Ctx = call.context(klerk)
@@ -23,6 +24,9 @@ fun Application.configureRouting(klerk: Klerk<Ctx, Data>) {
         route("/api") {
             get("/todos") {
                 getTodos(call, klerk)
+            }
+            post("/todos") {
+                createTodo(call, klerk)
             }
         }
 
