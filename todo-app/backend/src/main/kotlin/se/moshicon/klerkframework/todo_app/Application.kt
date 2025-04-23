@@ -3,6 +3,10 @@ package se.moshicon.klerkframework.todo_app
 import dev.klerkframework.klerk.Klerk
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
+import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.server.application.*
+import io.ktor.serialization.kotlinx.json.*
+
 import kotlinx.coroutines.runBlocking
 
 fun main() {
@@ -22,6 +26,9 @@ fun main() {
 
     }
     embeddedServer(Netty, port = 8080, host = "0.0.0.0", module = {
+        install(ContentNegotiation) {
+            json()
+        }
         configureRouting(klerk)
     }).start(wait = true)
     //Thread.sleep(10.minutes.inWholeMilliseconds)
