@@ -1,0 +1,163 @@
+import React, { useState, useEffect } from 'react';
+import './App.css';
+import { Todo, CreateTodoParams } from './types/todo';
+// import { todoApi } from './services/api';
+import { mockTodoApi as todoApi } from './services/mockData';
+import TodoList from './components/TodoList';
+import TodoForm from './components/TodoForm';
+
+function App() {
+  const [todos, setTodos] = useState<Todo[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+  const [filter, setFilter] = useState<string>('all');
+
+  // Fetch todos on component mount
+  useEffect(() => {
+    fetchTodos();
+  }, []);
+
+  const fetchTodos = async () => {
+    setLoading(true);
+    try {
+      const data = await todoApi.getAllTodos();
+      setTodos(data);
+      setError(null);
+    } catch (err) {
+      setError('Failed to fetch todos. Please try again later.');
+      console.error('Error fetching todos:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleCreateTodo = async (todoData: CreateTodoParams) => {
+    try {
+      const newTodo = await todoApi.createTodo(todoData);
+      if (newTodo) {
+        setTodos([...todos, newTodo]);
+      }
+    } catch (err) {
+      setError('Failed to create todo. Please try again.');
+      console.error('Error creating todo:', err);
+    }
+  };
+
+  const handleCompleteTodo = async (id: string) => {
+    try {
+      const updatedTodo = await todoApi.markComplete(id);
+      if (updatedTodo) {
+        setTodos(todos.map(todo =>
+          todo.todoID === id ? { ...todo, state: 'Completed' } : todo
+        ));
+      }
+    } catch (err) {
+      setError('Failed to mark todo as complete. Please try again.');
+      console.error('Error completing todo:', err);
+    }
+  };
+
+  const handleTrashTodo = async (id: string) => {
+    try {
+      const trashedTodo = await todoApi.moveToTrash(id);
+      if (trashedTodo) {
+        setTodos(todos.map(todo =>
+          todo.todoID === id ? { ...todo, state: 'Trashed' } : todo
+        ));
+      }
+    } catch (err) {
+      setError('Failed to move todo to trash. Please try again.');
+      console.error('Error trashing todo:', err);
+    }
+  };
+
+  return (
+    <div className="App" style={{ maxWidth: '800px', margin: '0 auto', padding: '20px' }}>
+      <h1 style={{ textAlign: 'center', marginBottom: '30px' }}>Todo App</h1>
+
+      {error && (
+        <div style={{
+          backgroundColor: '#ffebee',
+          color: '#c62828',
+          padding: '10px',
+          borderRadius: '4px',
+          marginBottom: '20px'
+        }}>
+          {error}
+        </div>
+      )}
+
+      <TodoForm onSubmit={handleCreateTodo} />
+
+      <div style={{ marginBottom: '20px' }}>
+        <div style={{ display: 'flex', gap: '10px', marginBottom: '20px' }}>
+          <button
+            onClick={() => setFilter('all')}
+            style={{
+              backgroundColor: filter === 'all' ? '#2196F3' : '#e0e0e0',
+              color: filter === 'all' ? 'white' : 'black',
+              border: 'none',
+              padding: '8px 12px',
+              borderRadius: '4px',
+              cursor: 'pointer'
+            }}
+          >
+            All
+          </button>
+          <button
+            onClick={() => setFilter('active')}
+            style={{
+              backgroundColor: filter === 'active' ? '#2196F3' : '#e0e0e0',
+              color: filter === 'active' ? 'white' : 'black',
+              border: 'none',
+              padding: '8px 12px',
+              borderRadius: '4px',
+              cursor: 'pointer'
+            }}
+          >
+            Active
+          </button>
+          <button
+            onClick={() => setFilter('completed')}
+            style={{
+              backgroundColor: filter === 'completed' ? '#2196F3' : '#e0e0e0',
+              color: filter === 'completed' ? 'white' : 'black',
+              border: 'none',
+              padding: '8px 12px',
+              borderRadius: '4px',
+              cursor: 'pointer'
+            }}
+          >
+            Completed
+          </button>
+          <button
+            onClick={() => setFilter('trashed')}
+            style={{
+              backgroundColor: filter === 'trashed' ? '#2196F3' : '#e0e0e0',
+              color: filter === 'trashed' ? 'white' : 'black',
+              border: 'none',
+              padding: '8px 12px',
+              borderRadius: '4px',
+              cursor: 'pointer'
+            }}
+          >
+            Trash
+          </button>
+        </div>
+      </div>
+
+      {loading ? (
+        <p>Loading todos...</p>
+      ) : (
+        <TodoList
+          todos={todos}
+          onComplete={handleCompleteTodo}
+          onTrash={handleTrashTodo}
+          filter={filter}
+        />
+      )}
+    </div>
+  );
+}
+
+export default App;
