@@ -21,17 +21,15 @@ fun Application.configureRouting(klerk: Klerk<Ctx, Data>) {
     )
 
     routing {
-//        get("/") { listGames(call, klerk, lowCodeConfig) }
-        get("/todos") { getTodos(call, klerk) }
-//        post("/game/{id}") { confirmMove(call, klerk) }
-//        get("/sse/{id}") { handleSse(call, klerk) }
+        route("/api") {
+            get("/todos") { getTodos(call, klerk) }
+        }
 
         // The auto-generated Admin UI
         val autoAdminUI = LowCodeMain(klerk, lowCodeConfig)
         apply(autoAdminUI.registerRoutes())
     }
 }
-
 
 internal fun showOptionalParameters(event: EventReference) = false
 
