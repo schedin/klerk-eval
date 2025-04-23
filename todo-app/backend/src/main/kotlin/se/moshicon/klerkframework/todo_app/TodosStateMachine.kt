@@ -12,12 +12,18 @@ import kotlin.time.Duration.Companion.minutes
 
 enum class TodoStates {
     Created,
+    Completed,
     Trashed,
 }
 
 val todoStateMachine = stateMachine {
     event(CreateTodo) {
     }
+    event(MarkComplete) {
+    }
+    event(UnmarkComplete) {
+    }
+
     event(MoveToTrash) {
     }
 
@@ -31,14 +37,23 @@ val todoStateMachine = stateMachine {
         onEvent(MoveToTrash) {
             transitionTo(Trashed)
         }
+        onEvent(MarkComplete) {
+            transitionTo(Completed)
+        }
     }
+
+    state(Completed) {
+        onEvent(MoveToTrash) {
+            transitionTo(Trashed)
+        }
+    }
+
     state(Trashed) {
         atTime(::autoDeleteTodoInTrashTime) {
             delete()
         }
     }
 }
-
 
 object CreateTodo : VoidEventWithParameters<Todo, CreateTodoParams>(Todo::class, true, CreateTodoParams::class)
 class CreateTodoParams(val title: TodoTitle, val description: TodoDescription)
@@ -52,6 +67,8 @@ fun createTodo(args: ArgForVoidEvent<Todo, CreateTodoParams, Ctx, Data>): Todo {
     )
 }
 
+object MarkComplete : InstanceEventNoParameters<Todo>(Todo::class, true)
+object UnmarkComplete : InstanceEventNoParameters<Todo>(Todo::class, true)
 object MoveToTrash : InstanceEventNoParameters<Todo>(Todo::class, true)
 
 fun autoDeleteTodoInTrashTime(args: ArgForInstanceNonEvent<Todo, Ctx, Data>): Instant {
