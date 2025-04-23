@@ -4,9 +4,7 @@ import dev.klerkframework.klerk.Klerk
 import io.ktor.server.application.*
 import io.ktor.server.response.*
 import kotlinx.serialization.Serializable
-import se.moshicon.klerkframework.todo_app.Ctx
-import se.moshicon.klerkframework.todo_app.Data
-import se.moshicon.klerkframework.todo_app.context
+import se.moshicon.klerkframework.todo_app.*
 
 @Serializable
 data class TodoResponse(
@@ -15,6 +13,9 @@ data class TodoResponse(
     val description: String,
     val state: String,
 )
+
+@Serializable
+data class CreateTodoParams(val title: String, val description: String)
 
 suspend fun getTodos(call: ApplicationCall, klerk: Klerk<Ctx, Data>) {
     val context = call.context(klerk)
