@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { Todo, CreateTodoParams } from '../types/todo';
 
-const API_URL = '';  // Empty string to use the proxy configured in package.json
+const API_URL = '/api';  // Empty string to use the proxy configured in package.json
 
 // Create axios instance with base URL
 const api = axios.create({
