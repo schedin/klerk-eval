@@ -8,6 +8,7 @@ import dev.klerkframework.web.LowCodeMain
 
 import io.ktor.server.application.*
 import io.ktor.server.routing.*
+import se.moshicon.klerkframework.todo_app.httpapi.getTodos
 
 fun Application.configureRouting(klerk: Klerk<Ctx, Data>) {
     suspend fun contextFromCall(call: ApplicationCall): Ctx = call.context(klerk)
@@ -21,7 +22,7 @@ fun Application.configureRouting(klerk: Klerk<Ctx, Data>) {
 
     routing {
 //        get("/") { listGames(call, klerk, lowCodeConfig) }
-//        get("/game/{id}") { renderGame(call, klerk, lowCodeConfig) }
+        get("/todos") { getTodos(call, klerk) }
 //        post("/game/{id}") { confirmMove(call, klerk) }
 //        get("/sse/{id}") { handleSse(call, klerk) }
 
@@ -31,23 +32,24 @@ fun Application.configureRouting(klerk: Klerk<Ctx, Data>) {
     }
 }
 
+
 internal fun showOptionalParameters(event: EventReference) = false
 
 
-suspend fun ApplicationCall.context(klerk: Klerk<Ctx, Data>): Ctx {
-    return Ctx(SystemIdentity)
-}
-///**
-// * Creates a Context from a Call.
-// * As authentication is something that should not be handled by Klerk, we will just fake it here.
-// */
 //suspend fun ApplicationCall.context(klerk: Klerk<Ctx, Data>): Ctx {
-//    val user = klerk.read(Ctx(SystemIdentity)) {
+//    return Ctx(SystemIdentity)
+//}
+/**
+ * Creates a Context from a Call.
+ * As authentication is something that should not be handled by Klerk, we will just fake it here.
+ */
+suspend fun ApplicationCall.context(klerk: Klerk<Ctx, Data>): Ctx {
+//    return Ctx(val user = klerk.read(Ctx(SystemIdentity)) {
 //        getFirstWhere(data.users.all) { it.props.name.valueWithoutAuthorization == "Alice" }
 //    }
-//    return Ctx.fromUser(user)
-//}
-//
+    return Ctx(SystemIdentity)
+}
+
 ///**
 // * Creates a Context from a GraphQLContext. Used in the GraphQL API.
 // *
