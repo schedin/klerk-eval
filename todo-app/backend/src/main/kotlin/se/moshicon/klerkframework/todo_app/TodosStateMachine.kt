@@ -62,7 +62,7 @@ fun createTodo(args: ArgForVoidEvent<Todo, CreateTodoParams, Ctx, Data>): Todo {
         todoID = TodoID(UUID.randomUUID().toString()),
         title = args.command.params.title,
         description = args.command.params.description,
-        completed = TodoCompletedStatus(false),
+//        completed = TodoCompletedStatus(false),
 //        priority = TodoPriority(2),
     )
 }
