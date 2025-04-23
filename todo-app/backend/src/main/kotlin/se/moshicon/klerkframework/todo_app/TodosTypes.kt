@@ -1,13 +1,12 @@
 package se.moshicon.klerkframework.todo_app
 
-import dev.klerkframework.klerk.datatypes.BooleanContainer
 import dev.klerkframework.klerk.datatypes.StringContainer
 
 data class Todo(
     val todoID: TodoID,
     val title: TodoTitle,
     val description: TodoDescription,
-    val completed: TodoCompletedStatus,
+//    val completed: TodoCompletedStatus,
 //    val priority: TodoPriority,
 )
 
@@ -34,8 +33,8 @@ class TodoDescription(value: String) : StringContainer(value) {
     override val maxLines = Int.MAX_VALUE
 }
 
-class TodoCompletedStatus constructor(value: Boolean) : BooleanContainer(value) {
-}
+//class TodoCompletedStatus (value: Boolean) : BooleanContainer(value) {
+//}
 //sealed class TodoCompletedStatus protected constructor(value: Boolean) : BooleanContainer(value)
 //
 ////object TodoIsCompleted : TodoCompletedStatus(true)
