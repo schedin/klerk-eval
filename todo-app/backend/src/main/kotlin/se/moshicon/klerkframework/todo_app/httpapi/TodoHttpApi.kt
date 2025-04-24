@@ -7,6 +7,7 @@ import dev.klerkframework.klerk.command.CommandToken
 import dev.klerkframework.klerk.command.ProcessingOptions
 import dev.klerkframework.klerk.CommandResult.Success
 import dev.klerkframework.klerk.CommandResult.Failure
+import dev.klerkframework.klerk.ModelID
 
 import io.ktor.http.*
 import io.ktor.server.application.*
@@ -58,12 +59,10 @@ suspend fun createTodo(call: ApplicationCall, klerk: Klerk<Ctx, Data>) {
             call.respond(HttpStatusCode.BadRequest, result.problem.toString())
         }
         is Success -> {
-            val createdTodo = result.authorizedModels.entries.firstOrNull()?.value as? Model<Todo>
-            if (createdTodo == null) {
-                call.respond(HttpStatusCode.InternalServerError, "Could not find created todo")
-            } else {
-                call.respond(HttpStatusCode.Created, toTodoResponse(createdTodo))
+            val createdTodo = klerk.read(context) {
+                get(result.primaryModel!!)
             }
+            call.respond(HttpStatusCode.Created, toTodoResponse(createdTodo))
         }
     }
 }

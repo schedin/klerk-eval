@@ -10,7 +10,7 @@ const TodoForm: React.FC<TodoFormProps> = ({ onSubmit }) => {
   const [description, setDescription] = useState('');
 
   // Calculate remaining characters for the title
-  const maxTitleLength = 100;
+  const maxTitleLength = 110;
   const remainingChars = maxTitleLength - title.length;
   const isNearLimit = remainingChars <= 20;
   const isAtLimit = remainingChars <= 0;
