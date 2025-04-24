@@ -82,4 +82,15 @@ export const todoApi = {
       return null;
     }
   },
+
+  // Delete a todo permanently
+  deleteTodo: async (id: string): Promise<boolean> => {
+    try {
+      await api.delete(`/todos/${id}`);
+      return true;
+    } catch (error) {
+      console.error(`Error deleting todo ${id}:`, error);
+      return false;
+    }
+  },
 };

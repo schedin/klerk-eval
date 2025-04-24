@@ -89,6 +89,19 @@ function App() {
     }
   };
 
+  const handleDeleteTodo = async (id: string) => {
+    try {
+      const success = await todoApi.deleteTodo(id);
+      if (success) {
+        // Remove the todo from the list
+        setTodos(todos.filter(todo => todo.todoID !== id));
+      }
+    } catch (err) {
+      setError('Failed to delete todo. Please try again.');
+      console.error('Error deleting todo:', err);
+    }
+  };
+
   return (
     <div className="App" style={{ maxWidth: '800px', margin: '0 auto', padding: '20px' }}>
       <h1 style={{ textAlign: 'center', marginBottom: '30px' }}>Todo App</h1>
@@ -195,6 +208,7 @@ function App() {
           onComplete={handleCompleteTodo}
           onUncomplete={handleUncompleteTodo}
           onTrash={handleTrashTodo}
+          onDelete={handleDeleteTodo}
           filter={filter}
         />
       )}

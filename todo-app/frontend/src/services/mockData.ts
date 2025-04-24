@@ -97,5 +97,19 @@ export const mockTodoApi = {
         }
       }, 300);
     });
+  },
+
+  deleteTodo: async (id: string): Promise<boolean> => {
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        const todoIndex = mockTodos.findIndex(todo => todo.todoID === id);
+        if (todoIndex !== -1) {
+          mockTodos.splice(todoIndex, 1);
+          resolve(true);
+        } else {
+          resolve(false);
+        }
+      }, 300);
+    });
   }
 };

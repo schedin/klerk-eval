@@ -6,9 +6,10 @@ interface TodoItemProps {
   onComplete: (id: string) => void;
   onUncomplete: (id: string) => void;
   onTrash: (id: string) => void;
+  onDelete: (id: string) => void;
 }
 
-const TodoItem: React.FC<TodoItemProps> = ({ todo, onComplete, onUncomplete, onTrash }) => {
+const TodoItem: React.FC<TodoItemProps> = ({ todo, onComplete, onUncomplete, onTrash, onDelete }) => {
   return (
     <div className="todo-item" style={{
       border: '1px solid #ddd',
@@ -63,6 +64,21 @@ const TodoItem: React.FC<TodoItemProps> = ({ todo, onComplete, onUncomplete, onT
             }}
           >
             Move to Trash
+          </button>
+        )}
+        {todo.state === 'Trashed' && (
+          <button
+            onClick={() => onDelete(todo.todoID)}
+            style={{
+              backgroundColor: '#9e9e9e',
+              color: 'white',
+              border: 'none',
+              padding: '8px 12px',
+              borderRadius: '4px',
+              cursor: 'pointer'
+            }}
+          >
+            Delete Permanently
           </button>
         )}
       </div>
