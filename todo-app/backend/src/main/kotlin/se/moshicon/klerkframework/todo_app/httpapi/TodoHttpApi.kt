@@ -54,9 +54,7 @@ suspend fun createTodo(call: ApplicationCall, klerk: Klerk<Ctx, Data>) {
             description = TodoDescription(params.description),
         ),
     )
-    val result = klerk.handle(command, context, ProcessingOptions(CommandToken.simple()))
-
-    when(result) {
+    when(val result = klerk.handle(command, context, ProcessingOptions(CommandToken.simple()))) {
         is Failure -> {
             call.respond(HttpStatusCode.InternalServerError, result.problem)
         }
