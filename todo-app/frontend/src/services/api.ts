@@ -36,13 +36,17 @@ export const todoApi = {
   },
 
   // Create a new todo
-  createTodo: async (todoData: CreateTodoParams): Promise<Todo | null> => {
+  createTodo: async (todoData: CreateTodoParams): Promise<Todo> => {
     try {
       const response = await api.post('/todos', todoData);
       return response.data;
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error creating todo:', error);
-      return null;
+      // Propagate the error with the response data if available
+      if (error.response && error.response.data) {
+        throw new Error(error.response.data);
+      }
+      throw error; // Re-throw the original error if we can't extract a message
     }
   },
 

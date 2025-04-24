@@ -11,6 +11,7 @@ function App() {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [filter, setFilter] = useState<string>('all');
+  const [formError, setFormError] = useState<string | null>(null);
 
   // Fetch todos on component mount
   useEffect(() => {
@@ -32,14 +33,17 @@ function App() {
   };
 
   const handleCreateTodo = async (todoData: CreateTodoParams) => {
+    setFormError(null); // Clear previous form errors
     try {
       const newTodo = await todoApi.createTodo(todoData);
-      if (newTodo) {
-        setTodos([...todos, newTodo]);
-      }
-    } catch (err) {
-      setError('Failed to create todo. Please try again.');
+      setTodos([...todos, newTodo]);
+      return true; // Indicate success to clear the form
+    } catch (err: any) {
+      // Extract error message from the error
+      const errorMessage = err.message || 'Failed to create todo. Please try again.';
+      setFormError(errorMessage);
       console.error('Error creating todo:', err);
+      return false; // Indicate failure to preserve form data
     }
   };
 
@@ -84,6 +88,29 @@ function App() {
           marginBottom: '20px'
         }}>
           {error}
+        </div>
+      )}
+
+      {formError && (
+        <div style={{
+          backgroundColor: '#ffebee',
+          color: '#d32f2f',
+          padding: '15px',
+          borderRadius: '4px',
+          marginBottom: '20px',
+          border: '1px solid #f44336',
+          fontWeight: 'bold',
+          display: 'flex',
+          alignItems: 'center'
+        }}>
+          <span style={{ marginRight: '10px', fontSize: '20px' }}>⚠️</span>
+          <div>
+            <div style={{ fontWeight: 'bold', marginBottom: '5px' }}>Error:</div>
+            <div>{formError}</div>
+            <div style={{ marginTop: '5px', fontSize: '14px', fontWeight: 'normal' }}>
+              Please correct the title length (maximum 100 characters) and try again.
+            </div>
+          </div>
         </div>
       )}
 
@@ -161,3 +188,5 @@ function App() {
 }
 
 export default App;
+
+
