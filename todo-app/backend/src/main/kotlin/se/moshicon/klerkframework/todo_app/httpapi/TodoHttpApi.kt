@@ -55,7 +55,7 @@ suspend fun createTodo(call: ApplicationCall, klerk: Klerk<Ctx, Data>) {
     )
     when(val result = klerk.handle(command, context, ProcessingOptions(CommandToken.simple()))) {
         is Failure -> {
-            call.respond(HttpStatusCode.InternalServerError, result.problem)
+            call.respond(HttpStatusCode.BadRequest, result.problem.toString())
         }
         is Success -> {
             val createdTodo = result.authorizedModels.entries.firstOrNull()?.value as? Model<Todo>
