@@ -8,10 +8,11 @@ interface TodoListProps {
   onUncomplete: (id: string) => void;
   onTrash: (id: string) => void;
   onDelete: (id: string) => void;
+  onUntrash: (id: string) => void;
   filter: string;
 }
 
-const TodoList: React.FC<TodoListProps> = ({ todos, onComplete, onUncomplete, onTrash, onDelete, filter }) => {
+const TodoList: React.FC<TodoListProps> = ({ todos, onComplete, onUncomplete, onTrash, onDelete, onUntrash, filter }) => {
   // Filter todos based on the selected filter
   const filteredTodos = todos.filter(todo => {
     if (filter === 'all') return todo.state !== 'Trashed';
@@ -41,6 +42,7 @@ const TodoList: React.FC<TodoListProps> = ({ todos, onComplete, onUncomplete, on
             onUncomplete={onUncomplete}
             onTrash={onTrash}
             onDelete={onDelete}
+            onUntrash={onUntrash}
           />
         ))
       )}

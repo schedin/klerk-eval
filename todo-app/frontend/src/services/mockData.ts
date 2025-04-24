@@ -111,5 +111,19 @@ export const mockTodoApi = {
         }
       }, 300);
     });
+  },
+
+  untrashTodo: async (id: string): Promise<Todo | null> => {
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        const todoIndex = mockTodos.findIndex(todo => todo.todoID === id);
+        if (todoIndex !== -1) {
+          mockTodos[todoIndex].state = 'Created';
+          resolve(mockTodos[todoIndex]);
+        } else {
+          resolve(null);
+        }
+      }, 300);
+    });
   }
 };

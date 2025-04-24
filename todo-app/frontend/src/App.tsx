@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import './App.css';
 import { Todo, CreateTodoParams } from './types/todo';
 import { todoApi } from './services/api';
@@ -86,6 +86,20 @@ function App() {
     } catch (err) {
       setError('Failed to move todo to trash. Please try again.');
       console.error('Error trashing todo:', err);
+    }
+  };
+
+  const handleUntrashTodo = async (id: string) => {
+    try {
+      const recoveredTodo = await todoApi.untrashTodo(id);
+      if (recoveredTodo) {
+        setTodos(todos.map(todo =>
+          todo.todoID === id ? { ...todo, state: 'Created' } : todo
+        ));
+      }
+    } catch (err) {
+      setError('Failed to recover todo from trash. Please try again.');
+      console.error('Error recovering todo:', err);
     }
   };
 
@@ -209,6 +223,7 @@ function App() {
           onUncomplete={handleUncompleteTodo}
           onTrash={handleTrashTodo}
           onDelete={handleDeleteTodo}
+          onUntrash={handleUntrashTodo}
           filter={filter}
         />
       )}

@@ -93,4 +93,15 @@ export const todoApi = {
       return false;
     }
   },
+
+  // Recover a todo from trash
+  untrashTodo: async (id: string): Promise<Todo | null> => {
+    try {
+      const response = await api.post(`/todos/${id}/untrash`);
+      return response.data;
+    } catch (error) {
+      console.error(`Error recovering todo ${id} from trash:`, error);
+      return null;
+    }
+  },
 };
