@@ -7,8 +7,7 @@ import dev.klerkframework.web.LowCodeMain
 
 import io.ktor.server.application.*
 import io.ktor.server.routing.*
-import se.moshicon.klerkframework.todo_app.httpapi.getTodos
-import se.moshicon.klerkframework.todo_app.httpapi.createTodo
+import se.moshicon.klerkframework.todo_app.httpapi.*
 
 fun Application.configureRouting(klerk: Klerk<Ctx, Data>) {
     suspend fun contextFromCall(call: ApplicationCall): Ctx = call.context(klerk)
@@ -26,6 +25,10 @@ fun Application.configureRouting(klerk: Klerk<Ctx, Data>) {
             }
             post("/todos") {
                 createTodo(call, klerk)
+            }
+            post("/todos/{todoID}/complete") {
+                val todoID = call.parameters["todoID"] ?: throw IllegalArgumentException("todoID is required")
+                markComplete(call, klerk, todoID)
             }
         }
 

@@ -23,6 +23,12 @@ data class TodoResponse(
     val state: String,
 )
 
+//@Serializable data class MarkCompleteRequest(val todoID: String)
+//@Serializable data class TodoMarkUnmarkComplete(val todoID: String)
+//@Serializable data class TodoMoveToTrash(val todoID: String)
+//@Serializable data class TodoDeleteFromTrash(val todoID: String)
+
+
 @Serializable
 data class CreateTodoRequest(val title: String, val description: String)
 
@@ -62,6 +68,27 @@ suspend fun createTodo(call: ApplicationCall, klerk: Klerk<Ctx, Data>) {
                 get(result.primaryModel!!)
             }
             call.respond(HttpStatusCode.Created, toTodoResponse(createdTodo))
+        }
+    }
+}
+
+suspend fun markComplete(call: ApplicationCall, klerk: Klerk<Ctx, Data>, todoID: String) {
+    val context = call.context(klerk)
+    val todo = klerk.read(context) {
+        getFirstWhere(data.todos.all) { it.props.todoID == TodoID(todoID) }
+    }
+    val command = Command(
+        event = MarkComplete,
+        model = todo.id,
+        params = null
+    )
+    when(val result = klerk.handle(command, context, ProcessingOptions(CommandToken.simple()))) {
+        is Failure -> call.respond(HttpStatusCode.BadRequest, result.problem.toString())
+        is Success -> {
+            val updatedTodo = klerk.read(context) {
+                get(result.primaryModel!!)
+            }
+            call.respond(HttpStatusCode.Created, toTodoResponse(updatedTodo))
         }
     }
 }
