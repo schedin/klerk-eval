@@ -12,6 +12,7 @@ import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
+import kotlinx.datetime.Instant
 import kotlinx.serialization.Serializable
 import se.moshicon.klerkframework.todo_app.*
 
@@ -21,6 +22,7 @@ data class TodoResponse(
     val title: String,
     val description: String,
     val state: String,
+    val createdAt: Instant,
 )
 
 //@Serializable data class MarkCompleteRequest(val todoID: String)
@@ -36,7 +38,8 @@ fun toTodoResponse(todo: Model<Todo>) = TodoResponse(
     todoID = todo.props.todoID.value,
     title = todo.props.title.value,
     description = todo.props.description.value,
-    state = todo.state
+    state = todo.state,
+    createdAt = todo.createdAt,
 )
 
 suspend fun getTodos(call: ApplicationCall, klerk: Klerk<Ctx, Data>) {
