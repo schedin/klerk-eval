@@ -21,6 +21,11 @@ const TodoItem: React.FC<TodoItemProps> = ({ todo, onComplete, onUncomplete, onT
     }}>
       <h3>{todo.title}</h3>
       <p>{todo.description}</p>
+      {todo.createdAt && (
+        <p style={{ fontSize: '0.8rem', color: '#666', marginTop: '5px' }}>
+          Created: {new Date(todo.createdAt).toLocaleString()}
+        </p>
+      )}
       <div className="todo-actions" style={{ marginTop: '10px', display: 'flex', gap: '10px' }}>
         {/* Only show action buttons for non-trashed todos */}
         {todo.state !== 'Trashed' ? (

@@ -3,6 +3,7 @@ export interface Todo {
   title: string;
   description: string;
   state?: 'Created' | 'Completed' | 'Trashed';
+  createdAt?: string; // ISO string format from backend
 }
 
 export interface CreateTodoParams {

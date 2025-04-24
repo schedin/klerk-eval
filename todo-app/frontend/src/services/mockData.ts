@@ -7,19 +7,22 @@ let mockTodos: Todo[] = [
     todoID: uuidv4(),
     title: 'Learn React',
     description: 'Study React fundamentals and hooks',
-    state: 'Created'
+    state: 'Created',
+    createdAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString() // 7 days ago
   },
   {
     todoID: uuidv4(),
     title: 'Build Todo App',
     description: 'Create a todo application with React and TypeScript',
-    state: 'Created'
+    state: 'Created',
+    createdAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString() // 3 days ago
   },
   {
     todoID: uuidv4(),
     title: 'Learn Kotlin',
     description: 'Study Kotlin basics for backend development',
-    state: 'Completed'
+    state: 'Completed',
+    createdAt: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString() // 10 days ago
   }
 ];
 
@@ -49,7 +52,8 @@ export const mockTodoApi = {
           todoID: uuidv4(),
           title: todoData.title,
           description: todoData.description,
-          state: 'Created'
+          state: 'Created',
+          createdAt: new Date().toISOString()
         };
         mockTodos.push(newTodo);
         resolve(newTodo);
