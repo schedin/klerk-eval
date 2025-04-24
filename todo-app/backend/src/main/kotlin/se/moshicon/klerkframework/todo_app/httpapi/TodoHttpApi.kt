@@ -7,7 +7,6 @@ import dev.klerkframework.klerk.command.CommandToken
 import dev.klerkframework.klerk.command.ProcessingOptions
 import dev.klerkframework.klerk.CommandResult.Success
 import dev.klerkframework.klerk.CommandResult.Failure
-import dev.klerkframework.klerk.ModelID
 
 import io.ktor.http.*
 import io.ktor.server.application.*

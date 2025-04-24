@@ -1,6 +1,5 @@
 package se.moshicon.klerkframework.todo_app
 
-import dev.klerkframework.klerk.EventReference
 import dev.klerkframework.klerk.Klerk
 import dev.klerkframework.klerk.SystemIdentity
 import dev.klerkframework.web.LowCodeConfig
@@ -16,7 +15,7 @@ fun Application.configureRouting(klerk: Klerk<Ctx, Data>) {
     val lowCodeConfig = LowCodeConfig(
         basePath = "/admin",
         contextProvider = ::contextFromCall,
-        showOptionalParameters = ::showOptionalParameters,
+        showOptionalParameters = { false },
         cssPath = "https://unpkg.com/almond.css@latest/dist/almond.min.css",
     )
 
@@ -35,8 +34,6 @@ fun Application.configureRouting(klerk: Klerk<Ctx, Data>) {
         apply(autoAdminUI.registerRoutes())
     }
 }
-
-internal fun showOptionalParameters(event: EventReference) = false
 
 /**
  * Creates a Context from a Call.
