@@ -9,6 +9,7 @@ This is the frontend for the Todo application, built with React and TypeScript.
 - Mark todos as complete
 - Move todos to trash
 - Filter todos by state (All, Active, Completed, Trashed)
+- Display creation timestamps for todos
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
@@ -53,11 +54,11 @@ You don’t have to ever use `eject`. The curated feature set is suitable for sm
 
 The frontend is designed to work with the Kotlin backend. The backend should be running on port 8080.
 
-Currently, the app is using mock data for development. To switch to the real API:
+Currently, the app is using the real API service. If you want to switch to mock data for development:
 
 1. Open `src/App.tsx`
-2. Uncomment the line importing the real API service
-3. Comment out the line importing the mock API service
+2. Comment out the line importing the real API service (line 4)
+3. Uncomment the line importing the mock API service (line 5)
 
 ## Project Structure
 
