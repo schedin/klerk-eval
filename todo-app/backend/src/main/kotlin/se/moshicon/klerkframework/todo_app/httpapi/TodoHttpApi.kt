@@ -134,3 +134,45 @@ suspend fun delete(call: ApplicationCall, klerk: Klerk<Ctx, Data>, todoID: Strin
         }
     }
 }
+
+suspend fun trash(call: ApplicationCall, klerk: Klerk<Ctx, Data>, todoID: String) {
+    val context = call.context(klerk)
+    val todo = klerk.read(context) {
+        getFirstWhere(data.todos.all) { it.props.todoID == TodoID(todoID) }
+    }
+    val command = Command(
+        event = MoveToTrash,
+        model = todo.id,
+        params = null
+    )
+    when(val result = klerk.handle(command, context, ProcessingOptions(CommandToken.simple()))) {
+        is Failure -> call.respond(HttpStatusCode.BadRequest, result.problem.toString())
+        is Success -> {
+            val updatedTodo = klerk.read(context) {
+                get(result.primaryModel!!)
+            }
+            call.respond(HttpStatusCode.Created, toTodoResponse(updatedTodo))
+        }
+    }
+}
+
+suspend fun unTrash(call: ApplicationCall, klerk: Klerk<Ctx, Data>, todoID: String) {
+    val context = call.context(klerk)
+    val todo = klerk.read(context) {
+        getFirstWhere(data.todos.all) { it.props.todoID == TodoID(todoID) }
+    }
+    val command = Command(
+        event = RecoverFromTrash,
+        model = todo.id,
+        params = null
+    )
+    when(val result = klerk.handle(command, context, ProcessingOptions(CommandToken.simple()))) {
+        is Failure -> call.respond(HttpStatusCode.BadRequest, result.problem.toString())
+        is Success -> {
+            val updatedTodo = klerk.read(context) {
+                get(result.primaryModel!!)
+            }
+            call.respond(HttpStatusCode.Created, toTodoResponse(updatedTodo))
+        }
+    }
+}

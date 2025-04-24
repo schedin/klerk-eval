@@ -26,6 +26,14 @@ fun Application.configureRouting(klerk: Klerk<Ctx, Data>) {
             post("/todos") {
                 createTodo(call, klerk)
             }
+            post("/todos/{todoID}/trash") {
+                val todoID = call.parameters["todoID"] ?: throw IllegalArgumentException("todoID is required")
+                trash(call, klerk, todoID)
+            }
+            post("/todos/{todoID}/untrash") {
+                val todoID = call.parameters["todoID"] ?: throw IllegalArgumentException("todoID is required")
+                unTrash(call, klerk, todoID)
+            }
             post("/todos/{todoID}/complete") {
                 val todoID = call.parameters["todoID"] ?: throw IllegalArgumentException("todoID is required")
                 markComplete(call, klerk, todoID)

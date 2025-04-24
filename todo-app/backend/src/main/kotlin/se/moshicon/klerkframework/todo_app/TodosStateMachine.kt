@@ -8,6 +8,7 @@ import dev.klerkframework.klerk.statemachine.stateMachine
 import kotlinx.datetime.Instant
 import se.moshicon.klerkframework.todo_app.TodoStates.*
 import java.util.*
+import kotlin.time.Duration.Companion.days
 import kotlin.time.Duration.Companion.minutes
 
 enum class TodoStates {
@@ -17,15 +18,12 @@ enum class TodoStates {
 }
 
 val todoStateMachine = stateMachine {
-    event(CreateTodo) {
-    }
-    event(MarkComplete) {
-    }
-    event(UnmarkComplete) {
-    }
-
-    event(MoveToTrash) {
-    }
+    event(CreateTodo) { }
+    event(MarkComplete) { }
+    event(UnmarkComplete) { }
+    event(MoveToTrash) { }
+    event(RecoverFromTrash) { }
+    event(DeleteFromTrash) { }
 
     voidState {
         onEvent(CreateTodo) {
@@ -52,6 +50,9 @@ val todoStateMachine = stateMachine {
     }
 
     state(Trashed) {
+        onEvent(RecoverFromTrash) {
+            transitionTo(Created)
+        }
         atTime(::autoDeleteTodoInTrashTime) {
             delete()
         }
@@ -68,17 +69,16 @@ fun createTodo(args: ArgForVoidEvent<Todo, CreateTodoParams, Ctx, Data>): Todo {
         todoID = TodoID(UUID.randomUUID().toString()),
         title = args.command.params.title,
         description = args.command.params.description,
-//        completed = TodoCompletedStatus(false),
-//        priority = TodoPriority(2),
     )
 }
 
 object MarkComplete : InstanceEventNoParameters<Todo>(Todo::class, true)
 object UnmarkComplete : InstanceEventNoParameters<Todo>(Todo::class, true)
 object MoveToTrash : InstanceEventNoParameters<Todo>(Todo::class, true)
+object RecoverFromTrash : InstanceEventNoParameters<Todo>(Todo::class, true)
 object DeleteFromTrash : InstanceEventNoParameters<Todo>(Todo::class, true)
 
 fun autoDeleteTodoInTrashTime(args: ArgForInstanceNonEvent<Todo, Ctx, Data>): Instant {
-    //return args.time.plus(30.days)
-    return args.time.plus(1.minutes)
+    return args.time.plus(30.days)
+    //return args.time.plus(1.minutes)
 }

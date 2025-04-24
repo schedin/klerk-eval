@@ -51,7 +51,8 @@ const TodoItem: React.FC<TodoItemProps> = ({ todo, onComplete, onUncomplete, onT
             Mark Uncomplete
           </button>
         )}
-        {todo.state !== 'Trashed' && (
+        {/* Show either Trash or Delete button based on the todo state */}
+        {todo.state !== 'Trashed' ? (
           <button
             onClick={() => onTrash(todo.todoID)}
             style={{
@@ -65,12 +66,11 @@ const TodoItem: React.FC<TodoItemProps> = ({ todo, onComplete, onUncomplete, onT
           >
             Move to Trash
           </button>
-        )}
-        {todo.state === 'Trashed' && (
+        ) : (
           <button
             onClick={() => onDelete(todo.todoID)}
             style={{
-              backgroundColor: '#9e9e9e',
+              backgroundColor: '#f44336',
               color: 'white',
               border: 'none',
               padding: '8px 12px',
@@ -78,7 +78,7 @@ const TodoItem: React.FC<TodoItemProps> = ({ todo, onComplete, onUncomplete, onT
               cursor: 'pointer'
             }}
           >
-            Delete Permanently
+            Delete
           </button>
         )}
       </div>
