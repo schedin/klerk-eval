@@ -30,6 +30,10 @@ fun Application.configureRouting(klerk: Klerk<Ctx, Data>) {
                 val todoID = call.parameters["todoID"] ?: throw IllegalArgumentException("todoID is required")
                 markComplete(call, klerk, todoID)
             }
+            post("/todos/{todoID}/uncomplete") {
+                val todoID = call.parameters["todoID"] ?: throw IllegalArgumentException("todoID is required")
+                markUncomplete(call, klerk, todoID)
+            }
         }
 
         // The auto-generated Admin UI
