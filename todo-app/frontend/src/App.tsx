@@ -61,6 +61,20 @@ function App() {
     }
   };
 
+  const handleUncompleteTodo = async (id: string) => {
+    try {
+      const updatedTodo = await todoApi.markUncomplete(id);
+      if (updatedTodo) {
+        setTodos(todos.map(todo =>
+          todo.todoID === id ? { ...todo, state: 'Created' } : todo
+        ));
+      }
+    } catch (err) {
+      setError('Failed to mark todo as uncomplete. Please try again.');
+      console.error('Error uncompleting todo:', err);
+    }
+  };
+
   const handleTrashTodo = async (id: string) => {
     try {
       const trashedTodo = await todoApi.moveToTrash(id);
@@ -179,6 +193,7 @@ function App() {
         <TodoList
           todos={todos}
           onComplete={handleCompleteTodo}
+          onUncomplete={handleUncompleteTodo}
           onTrash={handleTrashTodo}
           filter={filter}
         />

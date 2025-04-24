@@ -71,6 +71,20 @@ export const mockTodoApi = {
     });
   },
 
+  markUncomplete: async (id: string): Promise<Todo | null> => {
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        const todoIndex = mockTodos.findIndex(todo => todo.todoID === id);
+        if (todoIndex !== -1) {
+          mockTodos[todoIndex].state = 'Created';
+          resolve(mockTodos[todoIndex]);
+        } else {
+          resolve(null);
+        }
+      }, 300);
+    });
+  },
+
   moveToTrash: async (id: string): Promise<Todo | null> => {
     return new Promise((resolve) => {
       setTimeout(() => {

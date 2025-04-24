@@ -4,15 +4,16 @@ import { Todo } from '../types/todo';
 interface TodoItemProps {
   todo: Todo;
   onComplete: (id: string) => void;
+  onUncomplete: (id: string) => void;
   onTrash: (id: string) => void;
 }
 
-const TodoItem: React.FC<TodoItemProps> = ({ todo, onComplete, onTrash }) => {
+const TodoItem: React.FC<TodoItemProps> = ({ todo, onComplete, onUncomplete, onTrash }) => {
   return (
-    <div className="todo-item" style={{ 
-      border: '1px solid #ddd', 
-      borderRadius: '4px', 
-      padding: '15px', 
+    <div className="todo-item" style={{
+      border: '1px solid #ddd',
+      borderRadius: '4px',
+      padding: '15px',
       marginBottom: '10px',
       backgroundColor: todo.state === 'Completed' ? '#f0fff0' : '#fff'
     }}>
@@ -20,7 +21,7 @@ const TodoItem: React.FC<TodoItemProps> = ({ todo, onComplete, onTrash }) => {
       <p>{todo.description}</p>
       <div className="todo-actions" style={{ marginTop: '10px', display: 'flex', gap: '10px' }}>
         {todo.state !== 'Completed' && (
-          <button 
+          <button
             onClick={() => onComplete(todo.todoID)}
             style={{
               backgroundColor: '#4CAF50',
@@ -34,8 +35,23 @@ const TodoItem: React.FC<TodoItemProps> = ({ todo, onComplete, onTrash }) => {
             Mark Complete
           </button>
         )}
+        {todo.state === 'Completed' && (
+          <button
+            onClick={() => onUncomplete(todo.todoID)}
+            style={{
+              backgroundColor: '#2196F3',
+              color: 'white',
+              border: 'none',
+              padding: '8px 12px',
+              borderRadius: '4px',
+              cursor: 'pointer'
+            }}
+          >
+            Mark Uncomplete
+          </button>
+        )}
         {todo.state !== 'Trashed' && (
-          <button 
+          <button
             onClick={() => onTrash(todo.todoID)}
             style={{
               backgroundColor: '#f44336',

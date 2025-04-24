@@ -61,6 +61,17 @@ export const todoApi = {
     }
   },
 
+  // Mark a todo as uncomplete (revert from completed state)
+  markUncomplete: async (id: string): Promise<Todo | null> => {
+    try {
+      const response = await api.post(`/todos/${id}/uncomplete`);
+      return response.data;
+    } catch (error) {
+      console.error(`Error marking todo ${id} as uncomplete:`, error);
+      return null;
+    }
+  },
+
   // Move a todo to trash
   moveToTrash: async (id: string): Promise<Todo | null> => {
     try {

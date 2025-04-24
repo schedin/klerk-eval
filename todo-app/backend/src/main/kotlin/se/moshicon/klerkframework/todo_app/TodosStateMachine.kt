@@ -46,10 +46,16 @@ val todoStateMachine = stateMachine {
         onEvent(MoveToTrash) {
             transitionTo(Trashed)
         }
+        onEvent(UnmarkComplete) {
+            transitionTo(Created)
+        }
     }
 
     state(Trashed) {
         atTime(::autoDeleteTodoInTrashTime) {
+            delete()
+        }
+        onEvent(DeleteFromTrash) {
             delete()
         }
     }
@@ -70,6 +76,7 @@ fun createTodo(args: ArgForVoidEvent<Todo, CreateTodoParams, Ctx, Data>): Todo {
 object MarkComplete : InstanceEventNoParameters<Todo>(Todo::class, true)
 object UnmarkComplete : InstanceEventNoParameters<Todo>(Todo::class, true)
 object MoveToTrash : InstanceEventNoParameters<Todo>(Todo::class, true)
+object DeleteFromTrash : InstanceEventNoParameters<Todo>(Todo::class, true)
 
 fun autoDeleteTodoInTrashTime(args: ArgForInstanceNonEvent<Todo, Ctx, Data>): Instant {
     //return args.time.plus(30.days)

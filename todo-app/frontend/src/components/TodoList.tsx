@@ -5,11 +5,12 @@ import TodoItem from './TodoItem';
 interface TodoListProps {
   todos: Todo[];
   onComplete: (id: string) => void;
+  onUncomplete: (id: string) => void;
   onTrash: (id: string) => void;
   filter: string;
 }
 
-const TodoList: React.FC<TodoListProps> = ({ todos, onComplete, onTrash, filter }) => {
+const TodoList: React.FC<TodoListProps> = ({ todos, onComplete, onUncomplete, onTrash, filter }) => {
   // Filter todos based on the selected filter
   const filteredTodos = todos.filter(todo => {
     if (filter === 'all') return todo.state !== 'Trashed';
@@ -27,16 +28,17 @@ const TodoList: React.FC<TodoListProps> = ({ todos, onComplete, onTrash, filter 
         {filter === 'completed' && 'Completed Todos'}
         {filter === 'trashed' && 'Trashed Todos'}
       </h2>
-      
+
       {filteredTodos.length === 0 ? (
         <p>No todos found.</p>
       ) : (
         filteredTodos.map(todo => (
-          <TodoItem 
-            key={todo.todoID} 
-            todo={todo} 
-            onComplete={onComplete} 
-            onTrash={onTrash} 
+          <TodoItem
+            key={todo.todoID}
+            todo={todo}
+            onComplete={onComplete}
+            onUncomplete={onUncomplete}
+            onTrash={onTrash}
           />
         ))
       )}
