@@ -5,7 +5,6 @@ import dev.klerkframework.klerk.Model
 import dev.klerkframework.klerk.command.Command
 import dev.klerkframework.klerk.command.CommandToken
 import dev.klerkframework.klerk.command.ProcessingOptions
-import dev.klerkframework.klerk.CommandResult
 import dev.klerkframework.klerk.CommandResult.Success
 import dev.klerkframework.klerk.CommandResult.Failure
 
