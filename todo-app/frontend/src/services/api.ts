@@ -1,6 +1,7 @@
 import axios from 'axios';
 import { Todo, CreateTodoParams } from '../types/todo';
 import { User } from '../types/user';
+import { getAuthToken } from './auth';
 
 const API_URL = '/api';  // Empty string to use the proxy configured in package.json
 
@@ -10,6 +11,15 @@ const api = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
+});
+
+// Add request interceptor to include auth token
+api.interceptors.request.use(config => {
+  const token = getAuthToken();
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
 });
 
 // API functions for users

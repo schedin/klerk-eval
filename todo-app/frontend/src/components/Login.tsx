@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { User } from '../types/user';
 import { userApi } from '../services/api';
+import { generateToken, setAuthToken } from '../services/auth';
 
 interface LoginProps {
   onLogin: (username: string) => void;
@@ -39,7 +40,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
       backgroundColor: 'white'
     }}>
       <h2 style={{ textAlign: 'center', marginBottom: '20px' }}>Login to Todo App</h2>
-      
+
       {error && (
         <div style={{
           backgroundColor: '#ffebee',
@@ -61,7 +62,11 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
             {users.map(user => (
               <button
                 key={user.username}
-                onClick={() => onLogin(user.username)}
+                onClick={() => {
+                  const token = generateToken(user.username);
+                  setAuthToken(token);
+                  onLogin(user.username);
+                }}
                 style={{
                   padding: '12px',
                   backgroundColor: '#2196F3',

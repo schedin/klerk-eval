@@ -8,8 +8,10 @@ import dev.klerkframework.klerk.command.ProcessingOptions
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
 import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.server.plugins.cors.routing.*
 import io.ktor.serialization.kotlinx.json.*
 import io.ktor.server.application.*
+import io.ktor.http.*
 
 import kotlinx.coroutines.runBlocking
 import se.moshicon.klerkframework.todo_app.http.configureRouting
@@ -35,9 +37,27 @@ fun main() {
 
     }
     embeddedServer(Netty, port = 8080, host = "0.0.0.0", module = {
+        // Configure CORS to allow frontend requests
+        install(CORS) {
+            allowMethod(HttpMethod.Options)
+            allowMethod(HttpMethod.Get)
+            allowMethod(HttpMethod.Post)
+            allowMethod(HttpMethod.Put)
+            allowMethod(HttpMethod.Delete)
+            allowMethod(HttpMethod.Patch)
+            allowHeader(HttpHeaders.Authorization)
+            allowHeader(HttpHeaders.ContentType)
+            allowHeader(HttpHeaders.AccessControlAllowOrigin)
+            allowCredentials = true
+            anyHost() // For development only - restrict in production
+        }
+
+        // Configure JSON serialization
         install(ContentNegotiation) {
             json()
         }
+
+        // Configure routing with JWT authentication
         configureRouting(klerk)
     }).start(wait = true)
     //Thread.sleep(10.minutes.inWholeMilliseconds)

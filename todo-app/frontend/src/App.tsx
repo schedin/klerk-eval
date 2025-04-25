@@ -6,10 +6,11 @@ import { todoApi, userApi } from './services/api';
 import TodoList from './components/TodoList';
 import TodoForm from './components/TodoForm';
 import Login from './components/Login';
+import { getCurrentUser, removeAuthToken } from './services/auth';
 
 function App() {
   const [currentUser, setCurrentUser] = useState<string | null>(
-    localStorage.getItem('currentUser')
+    getCurrentUser()
   );
   const [todos, setTodos] = useState<Todo[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -122,14 +123,14 @@ function App() {
     }
   };
 
+  // Add login/logout handlers
   const handleLogin = (username: string) => {
     setCurrentUser(username);
-    localStorage.setItem('currentUser', username);
   };
 
   const handleLogout = () => {
     setCurrentUser(null);
-    localStorage.removeItem('currentUser');
+    removeAuthToken();
   };
 
   // If no user is logged in, show the login screen

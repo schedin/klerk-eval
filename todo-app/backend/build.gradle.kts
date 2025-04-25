@@ -4,6 +4,7 @@ val ktor_version: String by project
 val logback_version: String by project
 val sqlite_jdbc_version: String by project
 val coroutinesVersion: String by project
+val jwt_version: String by project
 
 
 plugins {
@@ -35,6 +36,11 @@ dependencies {
     implementation("io.ktor:ktor-server-netty-jvm")
     implementation("io.ktor:ktor-serialization:$ktor_version")
     implementation("io.ktor:ktor-serialization-kotlinx-json:$ktor_version")
+
+    // Authentication
+    implementation("io.ktor:ktor-server-auth:$ktor_version")
+    implementation("io.ktor:ktor-server-auth-jwt:$ktor_version")
+    implementation("com.auth0:java-jwt:$jwt_version")
 
     testImplementation(kotlin("test"))
 }
