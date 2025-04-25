@@ -41,6 +41,10 @@ fun Application.configureRouting(klerk: Klerk<Ctx, Data>) {
             delete("/todos/{todoID}") {
                 delete(call, klerk)
             }
+
+            route("/users") {
+                apply(registerUsersRoutes(klerk))
+            }
         }
 
         route("/custom") {
