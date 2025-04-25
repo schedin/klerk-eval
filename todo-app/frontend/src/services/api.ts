@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { Todo, CreateTodoParams } from '../types/todo';
+import { User } from '../types/user';
 
 const API_URL = '/api';  // Empty string to use the proxy configured in package.json
 
@@ -10,6 +11,20 @@ const api = axios.create({
     'Content-Type': 'application/json',
   },
 });
+
+// API functions for users
+export const userApi = {
+  // Get all users
+  getAllUsers: async (): Promise<User[]> => {
+    try {
+      const response = await api.get('/users');
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching users:', error);
+      return [];
+    }
+  },
+};
 
 // API functions for todos
 export const todoApi = {

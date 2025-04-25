@@ -1,21 +1,28 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
+import './App.css';
 import { Todo, CreateTodoParams } from './types/todo';
-import { todoApi } from './services/api';
+import { todoApi, userApi } from './services/api';
 //import { mockTodoApi as todoApi } from './services/mockData';
 import TodoList from './components/TodoList';
 import TodoForm from './components/TodoForm';
+import Login from './components/Login';
 
 function App() {
+  const [currentUser, setCurrentUser] = useState<string | null>(
+    localStorage.getItem('currentUser')
+  );
   const [todos, setTodos] = useState<Todo[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [filter, setFilter] = useState<string>('all');
   const [formError, setFormError] = useState<string | null>(null);
 
-  // Fetch todos on component mount
+  // Fetch todos on component mount if user is logged in
   useEffect(() => {
-    fetchTodos();
-  }, []);
+    if (currentUser) {
+      fetchTodos();
+    }
+  }, [currentUser]);
 
   const fetchTodos = async () => {
     setLoading(true);
@@ -60,20 +67,6 @@ function App() {
     }
   };
 
-  const handleUncompleteTodo = async (id: string) => {
-    try {
-      const updatedTodo = await todoApi.markUncomplete(id);
-      if (updatedTodo) {
-        setTodos(todos.map(todo =>
-          todo.todoID === id ? { ...todo, state: 'Created' } : todo
-        ));
-      }
-    } catch (err) {
-      setError('Failed to mark todo as uncomplete. Please try again.');
-      console.error('Error uncompleting todo:', err);
-    }
-  };
-
   const handleTrashTodo = async (id: string) => {
     try {
       const trashedTodo = await todoApi.moveToTrash(id);
@@ -85,6 +78,20 @@ function App() {
     } catch (err) {
       setError('Failed to move todo to trash. Please try again.');
       console.error('Error trashing todo:', err);
+    }
+  };
+
+  const handleUncompleteTodo = async (id: string) => {
+    try {
+      const updatedTodo = await todoApi.markUncomplete(id);
+      if (updatedTodo) {
+        setTodos(todos.map(todo =>
+          todo.todoID === id ? { ...todo, state: 'Created' } : todo
+        ));
+      }
+    } catch (err) {
+      setError('Failed to mark todo as uncomplete. Please try again.');
+      console.error('Error uncompleting todo:', err);
     }
   };
 
@@ -115,9 +122,50 @@ function App() {
     }
   };
 
+  const handleLogin = (username: string) => {
+    setCurrentUser(username);
+    localStorage.setItem('currentUser', username);
+  };
+
+  const handleLogout = () => {
+    setCurrentUser(null);
+    localStorage.removeItem('currentUser');
+  };
+
+  // If no user is logged in, show the login screen
+  if (!currentUser) {
+    return <Login onLogin={handleLogin} />;
+  }
+
+  // Otherwise, show the todo app
   return (
     <div className="App" style={{ maxWidth: '800px', margin: '0 auto', padding: '20px' }}>
-      <h1 style={{ textAlign: 'center', marginBottom: '30px' }}>Todo App</h1>
+      <div style={{
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: '20px'
+      }}>
+        <h1 style={{ margin: 0 }}>Todo App</h1>
+        <div style={{ display: 'flex', alignItems: 'center' }}>
+          <span style={{ marginRight: '15px', fontWeight: 'bold' }}>
+            Logged in as: {currentUser}
+          </span>
+          <button
+            onClick={handleLogout}
+            style={{
+              backgroundColor: '#f44336',
+              color: 'white',
+              border: 'none',
+              padding: '8px 12px',
+              borderRadius: '4px',
+              cursor: 'pointer'
+            }}
+          >
+            Logout
+          </button>
+        </div>
+      </div>
 
       {error && (
         <div style={{

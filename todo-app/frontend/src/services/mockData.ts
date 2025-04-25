@@ -1,4 +1,5 @@
 import { Todo } from '../types/todo';
+import { User } from '../types/user';
 import { v4 as uuidv4 } from 'uuid';
 
 // Initial mock data
@@ -26,7 +27,25 @@ let mockTodos: Todo[] = [
   }
 ];
 
-// Mock API functions
+// Mock users data
+const mockUsers: User[] = [
+  { username: 'Alice' },
+  { username: 'Bob' },
+  { username: 'Charlie' }
+];
+
+// Mock users API
+export const mockUserApi = {
+  getAllUsers: async (): Promise<User[]> => {
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        resolve([...mockUsers]);
+      }, 300);
+    });
+  }
+};
+
+// Mock todos API functions
 export const mockTodoApi = {
   getAllTodos: async (): Promise<Todo[]> => {
     return new Promise((resolve) => {
