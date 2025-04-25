@@ -6,7 +6,6 @@ import dev.klerkframework.web.LowCodeConfig
 import dev.klerkframework.web.LowCodeMain
 
 import io.ktor.server.application.*
-import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import se.moshicon.klerkframework.todo_app.httpapi.*
 
@@ -45,7 +44,7 @@ fun Application.configureRouting(klerk: Klerk<Ctx, Data>) {
         }
 
         route("/custom") {
-            apply(registerCustomRoutes(klerk))
+            apply(registerFullControlModeRoutes(klerk))
         }
 
         // The auto-generated Admin UI

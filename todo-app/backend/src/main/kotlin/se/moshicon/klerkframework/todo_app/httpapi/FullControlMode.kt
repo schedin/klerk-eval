@@ -1,12 +1,18 @@
 package se.moshicon.klerkframework.todo_app.httpapi
 
+import dev.klerkframework.klerk.CommandResult.Failure
+import dev.klerkframework.klerk.CommandResult.Success
 import dev.klerkframework.klerk.EventWithParameters
 import dev.klerkframework.klerk.Klerk
+import dev.klerkframework.klerk.command.Command
+import dev.klerkframework.klerk.command.CommandToken
+import dev.klerkframework.klerk.command.ProcessingOptions
 import dev.klerkframework.web.EventFormTemplate
 import io.ktor.server.application.*
 import io.ktor.server.response.*
 import dev.klerkframework.klerk.misc.EventParameters
 import dev.klerkframework.web.ParseResult
+import io.ktor.http.*
 import io.ktor.server.html.*
 import io.ktor.server.routing.*
 import kotlinx.html.body
@@ -40,7 +46,7 @@ object TodoFormTemplate {
     }
 }
 
-fun registerCustomRoutes(klerk: Klerk<Ctx, Data>): Route.() -> Unit = {
+fun registerFullControlModeRoutes(klerk: Klerk<Ctx, Data>): Route.() -> Unit = {
     // Initialize the template when routes are registered
     TodoFormTemplate.createTodoTemplate(klerk)
 
@@ -56,9 +62,27 @@ suspend fun handleCreateTodoFormPost(call: ApplicationCall, klerk: Klerk<Ctx, Da
     when (val result = TodoFormTemplate.createTodoTemplate(klerk).parse(call)) {
         is ParseResult.Invalid -> EventFormTemplate.respondInvalid(result, call)
         is ParseResult.DryRun -> println("TODO: describe what to do here")
-        is ParseResult.Parsed -> println(result.params)
+        is ParseResult.Parsed -> {
+            val context = call.context(klerk)
+            val params = result.params
+            val command = Command(
+                event = CreateTodo,
+                model = null,
+                params = params,
+            )
+            when(val commandResult = klerk.handle(command, context, ProcessingOptions(CommandToken.simple()))) {
+                is Failure -> {
+                    call.respond(HttpStatusCode.BadRequest, commandResult.problem.toString())
+                }
+                is Success -> {
+                    val createdTodo = klerk.read(context) {
+                        get(commandResult.primaryModel!!)
+                    }
+                    call.respond(HttpStatusCode.Created, toTodoResponse(createdTodo))
+                }
+            }
+        }
     }
-    call.respond("TODO create not implemented")
 }
 
 suspend fun showCreateTodoForm(call: ApplicationCall, klerk: Klerk<Ctx, Data>) {
