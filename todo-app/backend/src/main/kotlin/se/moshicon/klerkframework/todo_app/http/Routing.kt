@@ -1,4 +1,4 @@
-package se.moshicon.klerkframework.todo_app
+package se.moshicon.klerkframework.todo_app.http
 
 import dev.klerkframework.klerk.Klerk
 import dev.klerkframework.klerk.SystemIdentity
@@ -7,7 +7,8 @@ import dev.klerkframework.web.LowCodeMain
 
 import io.ktor.server.application.*
 import io.ktor.server.routing.*
-import se.moshicon.klerkframework.todo_app.httpapi.*
+import se.moshicon.klerkframework.todo_app.Ctx
+import se.moshicon.klerkframework.todo_app.Data
 
 fun Application.configureRouting(klerk: Klerk<Ctx, Data>) {
     suspend fun contextFromCall(call: ApplicationCall): Ctx = call.context(klerk)

@@ -12,6 +12,7 @@ import io.ktor.serialization.kotlinx.json.*
 import io.ktor.server.application.*
 
 import kotlinx.coroutines.runBlocking
+import se.moshicon.klerkframework.todo_app.http.configureRouting
 import se.moshicon.klerkframework.todo_app.users.CreateUser
 import se.moshicon.klerkframework.todo_app.users.CreateUserParams
 import se.moshicon.klerkframework.todo_app.users.UserName

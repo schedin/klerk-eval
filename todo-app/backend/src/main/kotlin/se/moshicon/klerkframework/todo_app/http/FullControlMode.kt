@@ -1,4 +1,4 @@
-package se.moshicon.klerkframework.todo_app.httpapi
+package se.moshicon.klerkframework.todo_app.http
 
 import dev.klerkframework.klerk.CommandResult.Failure
 import dev.klerkframework.klerk.CommandResult.Success
