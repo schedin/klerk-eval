@@ -10,23 +10,23 @@ enum class UserStates {
     Created
 }
 
-fun createUserStateMachine(): StateMachine<User, Enum<*>, Ctx, Data> =
-    stateMachine {
-        event(CreateUser) { }
+val userStateMachine = stateMachine {
+    event(CreateUser) { }
+    event(DeleteUser) { }
 
-        voidState {
-            onEvent(CreateUser) {
-                createModel(initialState = UserStates.Created, ::createUser)
-            }
+    voidState {
+        onEvent(CreateUser) {
+            createModel(initialState = UserStates.Created, ::createUser)
         }
-
-        state(UserStates.Created) {
-            onEvent(DeleteUser) {
-                delete()
-            }
-        }
-
     }
+
+    state(UserStates.Created) {
+        onEvent(DeleteUser) {
+            delete()
+            //TODO: Also delete all todos created by this user
+        }
+    }
+}
 
 object CreateUser : VoidEventWithParameters<User, CreateUserParams>(User::class, true, CreateUserParams::class)
 object DeleteUser : InstanceEventNoParameters<User>(User::class, true)

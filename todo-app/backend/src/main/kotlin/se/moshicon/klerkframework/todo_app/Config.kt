@@ -9,6 +9,8 @@ import kotlinx.datetime.Instant
 import org.sqlite.SQLiteDataSource
 import se.moshicon.klerkframework.todo_app.notes.Todo
 import se.moshicon.klerkframework.todo_app.notes.todoStateMachine
+import se.moshicon.klerkframework.todo_app.users.User
+import se.moshicon.klerkframework.todo_app.users.userStateMachine
 
 class Ctx(
     override val actor: ActorIdentity,
@@ -23,6 +25,7 @@ fun createConfig() = ConfigBuilder<Ctx, Data>(Data).build {
     }
     managedModels {
         model(Todo::class, todoStateMachine, Data.todos)
+        model(User::class, userStateMachine, Data.users)
     }
     persistence(createPersistence())
     contextProvider { actor -> Ctx(actor) }
@@ -30,6 +33,7 @@ fun createConfig() = ConfigBuilder<Ctx, Data>(Data).build {
 
 object Data {
     val todos = ModelCollections<Todo, Ctx>()
+    val users = ModelCollections<User, Ctx>()
 }
 
 private fun createPersistence(): Persistence {
