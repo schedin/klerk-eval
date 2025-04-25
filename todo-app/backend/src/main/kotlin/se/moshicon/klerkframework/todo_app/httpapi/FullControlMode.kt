@@ -5,7 +5,6 @@ import dev.klerkframework.klerk.CommandResult.Success
 import dev.klerkframework.klerk.EventWithParameters
 import dev.klerkframework.klerk.Klerk
 import dev.klerkframework.klerk.command.Command
-import dev.klerkframework.klerk.command.CommandToken
 import dev.klerkframework.klerk.command.ProcessingOptions
 import dev.klerkframework.web.EventFormTemplate
 import io.ktor.server.application.*
@@ -50,7 +49,7 @@ fun registerFullControlModeRoutes(klerk: Klerk<Ctx, Data>): Route.() -> Unit = {
     // Initialize the template when routes are registered
     TodoFormTemplate.createTodoTemplate(klerk)
 
-    get("/") { indexPage(call, klerk) }
+    get("/{...}") { indexPage(call, klerk) }
     get("/createForm") { showCreateTodoForm(call, klerk) }
     post("/create") { handleCreateTodoFormPost(call, klerk) }
 }
@@ -65,13 +64,12 @@ suspend fun handleCreateTodoFormPost(call: ApplicationCall, klerk: Klerk<Ctx, Da
         is ParseResult.DryRun -> println("TODO: describe what to do here")
         is ParseResult.Parsed -> {
             val context = call.context(klerk)
-            val params = result.params
             val command = Command(
                 event = CreateTodo,
                 model = null,
-                params = params,
+                params = result.params
             )
-            when(val commandResult = klerk.handle(command, context, ProcessingOptions(CommandToken.simple()))) {
+            when(val commandResult = klerk.handle(command, context, ProcessingOptions(result.key))) {
                 is Failure -> {
                     call.respond(HttpStatusCode.BadRequest, commandResult.problem.toString())
                 }
