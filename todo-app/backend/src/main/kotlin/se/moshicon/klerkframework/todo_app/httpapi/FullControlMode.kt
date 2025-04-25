@@ -6,18 +6,16 @@ import dev.klerkframework.klerk.EventWithParameters
 import dev.klerkframework.klerk.Klerk
 import dev.klerkframework.klerk.command.Command
 import dev.klerkframework.klerk.command.ProcessingOptions
-import dev.klerkframework.web.EventFormTemplate
-import io.ktor.server.application.*
-import io.ktor.server.response.*
 import dev.klerkframework.klerk.misc.EventParameters
+import dev.klerkframework.web.EventFormTemplate
 import dev.klerkframework.web.ParseResult
 import io.ktor.http.*
+import io.ktor.server.application.*
 import io.ktor.server.html.*
+import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import kotlinx.html.body
 import se.moshicon.klerkframework.todo_app.*
-import io.ktor.server.routing.get
-import io.ktor.server.routing.post
 
 /**
  * Singleton object to hold the createTodoTemplate instance
