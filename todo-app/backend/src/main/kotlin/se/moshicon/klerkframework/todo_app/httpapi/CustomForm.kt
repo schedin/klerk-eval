@@ -54,9 +54,6 @@ fun initCreateTodoTemplate(klerk: Klerk<Ctx, Data>): EventFormTemplate<CreateTod
     ) {
         text(CreateTodoParams::title)
         text(CreateTodoParams::description)
-        //text(CreateTodoParams::phone)
-        //number(CreateTodoParams::age)
-        //populatedAfterSubmit(CreateTodoParams::secretToken)
     }
     return createTodoTemplate
 }
