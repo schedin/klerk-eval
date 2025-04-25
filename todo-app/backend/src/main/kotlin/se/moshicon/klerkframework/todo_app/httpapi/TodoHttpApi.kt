@@ -89,12 +89,9 @@ suspend fun handleTodoCommand(
     when(val result = klerk.handle(command, context, ProcessingOptions(CommandToken.simple()))) {
         is Failure -> call.respond(HttpStatusCode.BadRequest, result.problem.toString())
         is Success -> {
-            var modifiedTodo = klerk.read(context) {
+            val modifiedTodo = klerk.read(context) {
                 getOrNull(result.primaryModel!!)
-            }
-            if (modifiedTodo == null) {
-                modifiedTodo = todo
-            }
+            } ?: todo
             onSuccess(modifiedTodo)
         }
     }
