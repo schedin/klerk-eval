@@ -14,13 +14,21 @@ interface TodoListProps {
 
 const TodoList: React.FC<TodoListProps> = ({ todos, onComplete, onUncomplete, onTrash, onDelete, onUntrash, filter }) => {
   // Filter todos based on the selected filter
-  const filteredTodos = todos.filter(todo => {
-    if (filter === 'all') return todo.state !== 'Trashed';
-    if (filter === 'active') return todo.state === 'Created';
-    if (filter === 'completed') return todo.state === 'Completed';
-    if (filter === 'trashed') return todo.state === 'Trashed';
-    return true;
-  });
+  const filteredTodos = todos
+    .filter(todo => {
+      if (filter === 'all') return todo.state !== 'Trashed';
+      if (filter === 'active') return todo.state === 'Created';
+      if (filter === 'completed') return todo.state === 'Completed';
+      if (filter === 'trashed') return todo.state === 'Trashed';
+      return true;
+    })
+    // Sort todos by createdAt timestamp in descending order (newest first)
+    .sort((a, b) => {
+      // Handle cases where createdAt might be undefined
+      if (!a.createdAt) return 1;
+      if (!b.createdAt) return -1;
+      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+    });
 
   return (
     <div className="todo-list">
