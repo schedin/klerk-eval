@@ -7,6 +7,7 @@ import dev.klerkframework.klerk.command.CommandToken
 import dev.klerkframework.klerk.command.ProcessingOptions
 import dev.klerkframework.klerk.CommandResult.Success
 import dev.klerkframework.klerk.CommandResult.Failure
+import dev.klerkframework.klerk.InstanceEventNoParameters
 
 import io.ktor.http.*
 import io.ktor.server.application.*
@@ -24,12 +25,6 @@ data class TodoResponse(
     val state: String,
     val createdAt: Instant,
 )
-
-//@Serializable data class MarkCompleteRequest(val todoID: String)
-//@Serializable data class TodoMarkUnmarkComplete(val todoID: String)
-//@Serializable data class TodoMoveToTrash(val todoID: String)
-//@Serializable data class TodoDeleteFromTrash(val todoID: String)
-
 
 @Serializable
 data class CreateTodoRequest(val title: String, val description: String)
@@ -75,104 +70,59 @@ suspend fun createTodo(call: ApplicationCall, klerk: Klerk<Ctx, Data>) {
     }
 }
 
-suspend fun markComplete(call: ApplicationCall, klerk: Klerk<Ctx, Data>, todoID: String) {
+suspend fun handleTodoCommand(
+    call: ApplicationCall,
+    klerk: Klerk<Ctx, Data>,
+    event: InstanceEventNoParameters<Todo>,
+    successBlock: suspend (s: Model<Todo>) -> Unit = {},
+) {
+    val todoID = call.parameters["todoID"] ?: throw IllegalArgumentException("todoID is required")
     val context = call.context(klerk)
     val todo = klerk.read(context) {
         getFirstWhere(data.todos.all) { it.props.todoID == TodoID(todoID) }
     }
     val command = Command(
-        event = MarkComplete,
+        event = event,
         model = todo.id,
         params = null
     )
     when(val result = klerk.handle(command, context, ProcessingOptions(CommandToken.simple()))) {
         is Failure -> call.respond(HttpStatusCode.BadRequest, result.problem.toString())
         is Success -> {
-            val updatedTodo = klerk.read(context) {
+            val modifiedTodo = klerk.read(context) {
                 get(result.primaryModel!!)
             }
-            call.respond(HttpStatusCode.Created, toTodoResponse(updatedTodo))
+            successBlock(modifiedTodo)
         }
     }
 }
 
-suspend fun markUncomplete(call: ApplicationCall, klerk: Klerk<Ctx, Data>, todoID: String) {
-    val context = call.context(klerk)
-    val todo = klerk.read(context) {
-        getFirstWhere(data.todos.all) { it.props.todoID == TodoID(todoID) }
-    }
-    val command = Command(
-        event = UnmarkComplete,
-        model = todo.id,
-        params = null
-    )
-    when(val result = klerk.handle(command, context, ProcessingOptions(CommandToken.simple()))) {
-        is Failure -> call.respond(HttpStatusCode.BadRequest, result.problem.toString())
-        is Success -> {
-            val updatedTodo = klerk.read(context) {
-                get(result.primaryModel!!)
-            }
-            call.respond(HttpStatusCode.Created, toTodoResponse(updatedTodo))
-        }
+suspend fun markComplete(call: ApplicationCall, klerk: Klerk<Ctx, Data>) {
+    handleTodoCommand(call, klerk, MarkComplete) {
+        call.respond(HttpStatusCode.Created, toTodoResponse(it))
     }
 }
 
-suspend fun delete(call: ApplicationCall, klerk: Klerk<Ctx, Data>, todoID: String) {
-    val context = call.context(klerk)
-        val todo = klerk.read(context) {
-        getFirstWhere(data.todos.all) { it.props.todoID == TodoID(todoID) }
-    }
-    val command = Command(
-        event = RecoverFromTrash,
-        model = todo.id,
-        params = null
-    )
-    when(val result = klerk.handle(command, context, ProcessingOptions(CommandToken.simple()))) {
-        is Failure -> call.respond(HttpStatusCode.BadRequest, result.problem.toString())
-        is Success -> {
-            call.respond(HttpStatusCode.NoContent)
-        }
+suspend fun markUncomplete(call: ApplicationCall, klerk: Klerk<Ctx, Data>) {
+    handleTodoCommand(call, klerk, UnmarkComplete) {
+        call.respond(HttpStatusCode.NoContent, toTodoResponse(it))
     }
 }
 
-suspend fun trash(call: ApplicationCall, klerk: Klerk<Ctx, Data>, todoID: String) {
-    val context = call.context(klerk)
-    val todo = klerk.read(context) {
-        getFirstWhere(data.todos.all) { it.props.todoID == TodoID(todoID) }
-    }
-    val command = Command(
-        event = MoveToTrash,
-        model = todo.id,
-        params = null
-    )
-    when(val result = klerk.handle(command, context, ProcessingOptions(CommandToken.simple()))) {
-        is Failure -> call.respond(HttpStatusCode.BadRequest, result.problem.toString())
-        is Success -> {
-            val updatedTodo = klerk.read(context) {
-                get(result.primaryModel!!)
-            }
-            call.respond(HttpStatusCode.Created, toTodoResponse(updatedTodo))
-        }
+suspend fun delete(call: ApplicationCall, klerk: Klerk<Ctx, Data>) {
+    handleTodoCommand(call, klerk, DeleteFromTrash) {
+        call.respond(HttpStatusCode.NoContent)
     }
 }
 
-suspend fun unTrash(call: ApplicationCall, klerk: Klerk<Ctx, Data>, todoID: String) {
-    val context = call.context(klerk)
-    val todo = klerk.read(context) {
-        getFirstWhere(data.todos.all) { it.props.todoID == TodoID(todoID) }
+suspend fun trash(call: ApplicationCall, klerk: Klerk<Ctx, Data>) {
+    handleTodoCommand(call, klerk, MoveToTrash) {
+        call.respond(HttpStatusCode.OK, toTodoResponse(it))
     }
-    val command = Command(
-        event = RecoverFromTrash,
-        model = todo.id,
-        params = null
-    )
-    when(val result = klerk.handle(command, context, ProcessingOptions(CommandToken.simple()))) {
-        is Failure -> call.respond(HttpStatusCode.BadRequest, result.problem.toString())
-        is Success -> {
-            val updatedTodo = klerk.read(context) {
-                get(result.primaryModel!!)
-            }
-            call.respond(HttpStatusCode.Created, toTodoResponse(updatedTodo))
-        }
+}
+
+suspend fun unTrash(call: ApplicationCall, klerk: Klerk<Ctx, Data>) {
+    handleTodoCommand(call, klerk, RecoverFromTrash) {
+        call.respond(HttpStatusCode.OK, toTodoResponse(it))
     }
 }
