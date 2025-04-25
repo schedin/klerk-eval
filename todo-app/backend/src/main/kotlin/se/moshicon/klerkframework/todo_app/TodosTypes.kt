@@ -1,17 +1,18 @@
 package se.moshicon.klerkframework.todo_app
 
+import dev.klerkframework.klerk.datatypes.IntContainer
 import dev.klerkframework.klerk.datatypes.StringContainer
 
 data class Todo(
     val title: TodoTitle,
     val description: TodoDescription,
-//    val priority: TodoPriority,
+    val priority: TodoPriority = TodoPriority(0),
 )
 
-//class TodoPriority(value: Int) : IntContainer(value) {
-//    override val min = 0
-//    override val max = 10
-//}
+class TodoPriority(value: Int) : IntContainer(value) {
+    override val min = 0
+    override val max = 10
+}
 
 class TodoTitle(value: String) : StringContainer(value) {
     override val minLength = 0
