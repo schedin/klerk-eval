@@ -21,30 +21,11 @@ fun Application.configureRouting(klerk: Klerk<Ctx, Data>) {
 
     routing {
         route("/api") {
-            get("/todos") {
-                getTodos(call, klerk)
-            }
-            post("/todos") {
-                createTodo(call, klerk)
-            }
-            post("/todos/{todoID}/trash") {
-                trash(call, klerk)
-            }
-            post("/todos/{todoID}/untrash") {
-                unTrash(call, klerk)
-            }
-            post("/todos/{todoID}/complete") {
-                markComplete(call, klerk)
-            }
-            post("/todos/{todoID}/uncomplete") {
-                markUncomplete(call, klerk)
-            }
-            delete("/todos/{todoID}") {
-                delete(call, klerk)
-            }
-
             route("/users") {
                 apply(registerUsersRoutes(klerk))
+            }
+            route("/todos") {
+                apply(registerTodoRoutes(klerk))
             }
         }
 

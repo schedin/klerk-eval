@@ -13,10 +13,35 @@ import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
+import io.ktor.server.routing.*
 import kotlinx.datetime.Instant
 import kotlinx.serialization.Serializable
 import se.moshicon.klerkframework.todo_app.*
 import se.moshicon.klerkframework.todo_app.notes.*
+
+fun registerTodoRoutes(klerk: Klerk<Ctx, Data>): Route.() -> Unit = {
+    get("/{...}") {
+        getTodos(call, klerk)
+    }
+    post("/{...}") {
+        createTodo(call, klerk)
+    }
+    post("/{todoID}/trash") {
+        trash(call, klerk)
+    }
+    post("/{todoID}/untrash") {
+        unTrash(call, klerk)
+    }
+    post("/{todoID}/complete") {
+        markComplete(call, klerk)
+    }
+    post("/{todoID}/uncomplete") {
+        markUncomplete(call, klerk)
+    }
+    delete("/{todoID}") {
+        delete(call, klerk)
+    }
+}
 
 @Serializable
 data class TodoResponse(
