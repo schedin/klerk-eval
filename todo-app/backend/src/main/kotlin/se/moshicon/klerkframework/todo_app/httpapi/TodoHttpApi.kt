@@ -74,7 +74,7 @@ suspend fun handleTodoCommand(
     call: ApplicationCall,
     klerk: Klerk<Ctx, Data>,
     event: InstanceEventNoParameters<Todo>,
-    successBlock: suspend (s: Model<Todo>) -> Unit = {},
+    onSuccess: suspend (s: Model<Todo>) -> Unit = {},
 ) {
     val todoID = call.parameters["todoID"] ?: throw IllegalArgumentException("todoID is required")
     val context = call.context(klerk)
@@ -92,7 +92,7 @@ suspend fun handleTodoCommand(
             val modifiedTodo = klerk.read(context) {
                 get(result.primaryModel!!)
             }
-            successBlock(modifiedTodo)
+            onSuccess(modifiedTodo)
         }
     }
 }
