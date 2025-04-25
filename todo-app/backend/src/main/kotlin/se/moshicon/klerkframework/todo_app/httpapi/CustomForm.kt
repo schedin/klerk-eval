@@ -12,26 +12,37 @@ import io.ktor.server.routing.*
 import kotlinx.html.body
 import se.moshicon.klerkframework.todo_app.*
 import io.ktor.server.routing.get
+import io.ktor.server.routing.post
 
-class CustomForm {
-    fun initCreateTodoTemplate(klerk: Klerk<Ctx, Data>): EventFormTemplate<CreateTodoParams, Ctx> {
-        val createTodoTemplate = EventFormTemplate(
-            EventWithParameters(
-                CreateTodo.id,
-                EventParameters(CreateTodoParams::class)
-            ), klerk, "create",
-        ) {
-            text(CreateTodoParams::title)
-            text(CreateTodoParams::description)
+/**
+ * Singleton object to hold the createTodoTemplate instance
+ * This ensures the template is only created once and can be reused
+ */
+object TodoFormTemplate {
+    private var _createTodoTemplate: EventFormTemplate<CreateTodoParams, Ctx>? = null
+
+    /**
+     * Get or initialize the template with the Klerk instance
+     */
+    fun createTodoTemplate(klerk: Klerk<Ctx, Data>): EventFormTemplate<CreateTodoParams, Ctx> {
+        if (_createTodoTemplate == null) {
+            _createTodoTemplate = EventFormTemplate(
+                EventWithParameters(
+                    CreateTodo.id,
+                    EventParameters(CreateTodoParams::class)
+                ), klerk, "create",
+            ) {
+                text(CreateTodoParams::title)
+                text(CreateTodoParams::description)
+            }
         }
-        return createTodoTemplate
-    }
-    companion object {
+        return _createTodoTemplate!!
     }
 }
 
 fun registerCustomRoutes(klerk: Klerk<Ctx, Data>): Route.() -> Unit = {
-
+    // Initialize the template when routes are registered
+    TodoFormTemplate.createTodoTemplate(klerk)
 
     get("/createForm") {
         showCreateTodoForm(call, klerk)
@@ -42,16 +53,16 @@ fun registerCustomRoutes(klerk: Klerk<Ctx, Data>): Route.() -> Unit = {
 }
 
 suspend fun handleCreateTodoFormPost(call: ApplicationCall, klerk: Klerk<Ctx, Data>) {
-    call.respond("TODO create not implemented")
-    when (val result = createTodoTemplate.parse(call)) {
+    when (val result = TodoFormTemplate.createTodoTemplate(klerk).parse(call)) {
         is ParseResult.Invalid -> EventFormTemplate.respondInvalid(result, call)
         is ParseResult.DryRun -> println("TODO: describe what to do here")
         is ParseResult.Parsed -> println(result.params)
     }
+    call.respond("TODO create not implemented")
 }
 
 suspend fun showCreateTodoForm(call: ApplicationCall, klerk: Klerk<Ctx, Data>) {
-    val template = createTodoTemplate(klerk)
+    val template = TodoFormTemplate.createTodoTemplate(klerk)
     val context = call.context(klerk)
     val createTodoForm = klerk.read(context) {
         template.build(call, null, this, translator = context.translator)
