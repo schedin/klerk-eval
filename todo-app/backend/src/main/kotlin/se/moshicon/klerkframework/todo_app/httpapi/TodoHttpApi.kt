@@ -105,7 +105,7 @@ suspend fun markComplete(call: ApplicationCall, klerk: Klerk<Ctx, Data>) {
 
 suspend fun markUncomplete(call: ApplicationCall, klerk: Klerk<Ctx, Data>) {
     handleTodoCommand(call, klerk, UnmarkComplete) {
-        call.respond(HttpStatusCode.NoContent, toTodoResponse(it))
+        call.respond(HttpStatusCode.Created, toTodoResponse(it))
     }
 }
 
