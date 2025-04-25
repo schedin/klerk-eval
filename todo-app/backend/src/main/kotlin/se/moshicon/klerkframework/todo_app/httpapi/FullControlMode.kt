@@ -50,12 +50,13 @@ fun registerFullControlModeRoutes(klerk: Klerk<Ctx, Data>): Route.() -> Unit = {
     // Initialize the template when routes are registered
     TodoFormTemplate.createTodoTemplate(klerk)
 
-    get("/createForm") {
-        showCreateTodoForm(call, klerk)
-    }
-    post("/create") {
-        handleCreateTodoFormPost(call, klerk)
-    }
+    get("/") { indexPage(call, klerk) }
+    get("/createForm") { showCreateTodoForm(call, klerk) }
+    post("/create") { handleCreateTodoFormPost(call, klerk) }
+}
+
+suspend fun indexPage(call: ApplicationCall, klerk: Klerk<Ctx, Data>) {
+    call.respond("TODO for slash")
 }
 
 suspend fun handleCreateTodoFormPost(call: ApplicationCall, klerk: Klerk<Ctx, Data>) {
