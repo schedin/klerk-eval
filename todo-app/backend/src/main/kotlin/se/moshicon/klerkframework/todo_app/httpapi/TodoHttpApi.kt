@@ -30,7 +30,7 @@ data class TodoResponse(
 data class CreateTodoRequest(val title: String, val description: String)
 
 fun toTodoResponse(todo: Model<Todo>) = TodoResponse(
-    todoID = todo.props.todoID.value,
+    todoID = todo.id.toString(),
     title = todo.props.title.value,
     description = todo.props.description.value,
     state = todo.state,
@@ -79,7 +79,7 @@ suspend fun handleTodoCommand(
     val todoID = call.parameters["todoID"] ?: throw IllegalArgumentException("todoID is required")
     val context = call.context(klerk)
     val todo = klerk.read(context) {
-        getFirstWhere(data.todos.all) { it.props.todoID == TodoID(todoID) }
+        getFirstWhere(data.todos.all) { it.id.toString() == todoID }
     }
     val command = Command(
         event = event,

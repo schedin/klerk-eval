@@ -7,9 +7,8 @@ import dev.klerkframework.klerk.VoidEventWithParameters
 import dev.klerkframework.klerk.statemachine.stateMachine
 import kotlinx.datetime.Instant
 import se.moshicon.klerkframework.todo_app.TodoStates.*
-import java.util.*
 import kotlin.time.Duration.Companion.days
-import kotlin.time.Duration.Companion.minutes
+
 
 enum class TodoStates {
     Created,
@@ -66,7 +65,6 @@ object CreateTodo : VoidEventWithParameters<Todo, CreateTodoParams>(Todo::class,
 class CreateTodoParams(val title: TodoTitle, val description: TodoDescription)
 fun createTodo(args: ArgForVoidEvent<Todo, CreateTodoParams, Ctx, Data>): Todo {
     return Todo(
-        todoID = TodoID(UUID.randomUUID().toString()),
         title = args.command.params.title,
         description = args.command.params.description,
     )
@@ -79,6 +77,6 @@ object RecoverFromTrash : InstanceEventNoParameters<Todo>(Todo::class, true)
 object DeleteFromTrash : InstanceEventNoParameters<Todo>(Todo::class, true)
 
 fun autoDeleteTodoInTrashTime(args: ArgForInstanceNonEvent<Todo, Ctx, Data>): Instant {
-    return args.time.plus(30.days)
+    return args.time.plus(1.days)
     //return args.time.plus(1.minutes)
 }
