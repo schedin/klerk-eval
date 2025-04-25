@@ -7,6 +7,8 @@ import dev.klerkframework.klerk.storage.SqlPersistence
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import org.sqlite.SQLiteDataSource
+import se.moshicon.klerkframework.todo_app.notes.Todo
+import se.moshicon.klerkframework.todo_app.notes.todoStateMachine
 
 class Ctx(
     override val actor: ActorIdentity,

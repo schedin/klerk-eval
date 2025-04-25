@@ -16,6 +16,7 @@ import io.ktor.server.response.*
 import kotlinx.datetime.Instant
 import kotlinx.serialization.Serializable
 import se.moshicon.klerkframework.todo_app.*
+import se.moshicon.klerkframework.todo_app.notes.*
 
 @Serializable
 data class TodoResponse(

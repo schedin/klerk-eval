@@ -1,4 +1,4 @@
-package se.moshicon.klerkframework.todo_app
+package se.moshicon.klerkframework.todo_app.notes
 
 import dev.klerkframework.klerk.datatypes.IntContainer
 import dev.klerkframework.klerk.datatypes.StringContainer

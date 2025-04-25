@@ -16,6 +16,8 @@ import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import kotlinx.html.body
 import se.moshicon.klerkframework.todo_app.*
+import se.moshicon.klerkframework.todo_app.notes.CreateTodo
+import se.moshicon.klerkframework.todo_app.notes.CreateTodoParams
 
 /**
  * Singleton object to hold the createTodoTemplate instance

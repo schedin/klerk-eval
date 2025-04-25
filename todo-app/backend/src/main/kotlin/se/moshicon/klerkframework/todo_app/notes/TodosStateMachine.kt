@@ -1,4 +1,4 @@
-package se.moshicon.klerkframework.todo_app
+package se.moshicon.klerkframework.todo_app.notes
 
 import dev.klerkframework.klerk.ArgForInstanceNonEvent
 import dev.klerkframework.klerk.ArgForVoidEvent
@@ -6,7 +6,9 @@ import dev.klerkframework.klerk.InstanceEventNoParameters
 import dev.klerkframework.klerk.VoidEventWithParameters
 import dev.klerkframework.klerk.statemachine.stateMachine
 import kotlinx.datetime.Instant
-import se.moshicon.klerkframework.todo_app.TodoStates.*
+import se.moshicon.klerkframework.todo_app.Ctx
+import se.moshicon.klerkframework.todo_app.Data
+import se.moshicon.klerkframework.todo_app.notes.TodoStates.*
 import kotlin.time.Duration.Companion.days
 
 
