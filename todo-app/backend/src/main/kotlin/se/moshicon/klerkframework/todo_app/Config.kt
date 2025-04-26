@@ -19,38 +19,9 @@ class Ctx(
     override val translator: Translator = DefaultTranslator(),
 ) : KlerkContext
 
-// Helper function to check if actor is in a group
-fun actorInGroup(group: String): (Ctx) -> Boolean = { ctx ->
-    when (val actor = ctx.actor) {
-        is UserActorIdentity -> group in actor.groups
-        else -> false
-    }
-}
-
 fun createConfig() = ConfigBuilder<Ctx, Data>(Data).build {
     authorization {
-        // Define authorization rules based on user groups
-        rule {
-            // Allow admin group to do everything
-            actorInGroup("admin") allows everything()
-
-            // Allow users to create and manage todos
-            actorInGroup("user") allows {
-                create(Todo::class)
-                read(Todo::class)
-                update(Todo::class)
-                delete(Todo::class)
-            }
-
-            // Allow guests to only read todos
-            actorInGroup("guest") allows {
-                read(Todo::class)
-                read(User::class)
-            }
-
-            // Allow system to do everything (for initialization)
-            isSystem() allows everything()
-        }
+        apply(insecureAllowEverything())
     }
     managedModels {
         model(Todo::class, todoStateMachine, Data.todos)

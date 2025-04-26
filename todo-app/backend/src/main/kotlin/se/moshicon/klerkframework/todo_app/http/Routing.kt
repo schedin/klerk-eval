@@ -4,6 +4,7 @@ import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
 import com.auth0.jwt.exceptions.JWTVerificationException
 import com.auth0.jwt.interfaces.DecodedJWT
+import dev.klerkframework.klerk.CustomIdentity
 import dev.klerkframework.klerk.Klerk
 import dev.klerkframework.klerk.SystemIdentity
 import dev.klerkframework.web.LowCodeConfig
@@ -17,7 +18,6 @@ import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import se.moshicon.klerkframework.todo_app.Ctx
 import se.moshicon.klerkframework.todo_app.Data
-import se.moshicon.klerkframework.todo_app.UserActorIdentity
 
 // JWT configuration constants
 private const val JWT_SECRET = "your-secret-key" // In a real app, this would be in a secure config
@@ -96,7 +96,8 @@ fun ApplicationCall.context(klerk: Klerk<Ctx, Data>): Ctx {
             }
 
             // Create context with user identity
-            Ctx(UserActorIdentity(username, groups))
+            val externalId = 42L
+            Ctx(CustomIdentity(id = null, externalId = externalId))
         } catch (e: Exception) {
             // Fallback to system identity if JWT parsing fails
             println("Error parsing JWT: ${e.message}")
