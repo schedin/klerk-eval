@@ -1,26 +1,75 @@
-import axios from 'axios';
+// Using native fetch instead of axios to avoid Node.js dependencies
 import { Todo, CreateTodoParams } from '../types/todo';
 import { User } from '../types/user';
 import { getAuthToken } from './auth';
 
-const API_URL = '/api';  // Empty string to use the proxy configured in package.json
+const API_URL = '/api';  // Use the proxy configured in package.json
 
-// Create axios instance with base URL
-const api = axios.create({
-  baseURL: API_URL,
-  headers: {
-    'Content-Type': 'application/json',
-  },
-});
+// Create a simple wrapper around fetch to avoid axios issues
+const createApi = () => {
+  const headers = () => {
+    const baseHeaders = {
+      'Content-Type': 'application/json',
+    };
 
-// Add request interceptor to include auth token
-api.interceptors.request.use(config => {
-  const token = getAuthToken();
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-  return config;
-});
+    const token = getAuthToken();
+    if (token) {
+      return {
+        ...baseHeaders,
+        'Authorization': `Bearer ${token}`
+      };
+    }
+
+    return baseHeaders;
+  };
+
+  return {
+    get: async (url: string) => {
+      const response = await fetch(`${API_URL}${url}`, {
+        method: 'GET',
+        headers: headers(),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+
+      return { data: await response.json() };
+    },
+
+    post: async (url: string, data?: any) => {
+      const response = await fetch(`${API_URL}${url}`, {
+        method: 'POST',
+        headers: headers(),
+        body: data ? JSON.stringify(data) : undefined,
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        const error = new Error(errorText);
+        (error as any).response = { data: errorText };
+        throw error;
+      }
+
+      return { data: await response.json() };
+    },
+
+    delete: async (url: string) => {
+      const response = await fetch(`${API_URL}${url}`, {
+        method: 'DELETE',
+        headers: headers(),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+
+      return { data: await response.json() };
+    }
+  };
+};
+
+const api = createApi();
 
 // API functions for users
 export const userApi = {

@@ -1,8 +1,4 @@
-import jwt from 'jsonwebtoken';
-import { User } from '../types/user';
-
-// Mock secret key (in a real app, this would be on the server)
-const JWT_SECRET = 'your-secret-key';
+// Simple authentication service for the Todo app
 
 // Define user roles/groups
 const userGroups: Record<string, string[]> = {
@@ -11,34 +7,23 @@ const userGroups: Record<string, string[]> = {
   'Charlie': ['guest']
 };
 
-export interface JwtPayload {
-  sub: string;
-  name: string;
+// Simple user info interface
+export interface UserInfo {
+  username: string;
   groups: string[];
-  iat: number;
-  exp: number;
 }
 
+// For this demo, we'll create a simple token with user info
 export const generateToken = (username: string): string => {
-  // Create a JWT with user info and groups
-  return jwt.sign(
-    { 
-      sub: username,
-      name: username,
-      groups: userGroups[username] || ['guest'],
-    },
-    JWT_SECRET,
-    { expiresIn: '1h' }
-  );
-};
+  // Create a simple token with user info
+  const userInfo: UserInfo = {
+    username: username,
+    groups: userGroups[username] || ['guest']
+  };
 
-export const decodeToken = (token: string): JwtPayload | null => {
-  try {
-    return jwt.verify(token, JWT_SECRET) as JwtPayload;
-  } catch (error) {
-    console.error('Invalid token:', error);
-    return null;
-  }
+  // Just base64 encode the user info - this is NOT secure
+  // In a real app, you would use a proper JWT with signing
+  return btoa(JSON.stringify(userInfo));
 };
 
 export const getAuthToken = (): string | null => {
@@ -53,20 +38,32 @@ export const removeAuthToken = (): void => {
   localStorage.removeItem('authToken');
 };
 
+// Parse the token to get user info
+export const parseToken = (token: string): UserInfo | null => {
+  try {
+    // Decode the base64 token
+    const userInfo = JSON.parse(atob(token));
+    return userInfo as UserInfo;
+  } catch (error) {
+    console.error('Error parsing token:', error);
+    return null;
+  }
+};
+
 export const getCurrentUser = (): string | null => {
   const token = getAuthToken();
   if (!token) return null;
-  
-  const decoded = decodeToken(token);
-  return decoded?.sub || null;
+
+  const userInfo = parseToken(token);
+  return userInfo?.username || null;
 };
 
 export const getUserGroups = (): string[] => {
   const token = getAuthToken();
   if (!token) return [];
-  
-  const decoded = decodeToken(token);
-  return decoded?.groups || [];
+
+  const userInfo = parseToken(token);
+  return userInfo?.groups || [];
 };
 
 export const isAdmin = (): boolean => {

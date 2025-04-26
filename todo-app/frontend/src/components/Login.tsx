@@ -63,9 +63,14 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
               <button
                 key={user.username}
                 onClick={() => {
-                  const token = generateToken(user.username);
-                  setAuthToken(token);
-                  onLogin(user.username);
+                  try {
+                    const token = generateToken(user.username);
+                    setAuthToken(token);
+                    onLogin(user.username);
+                  } catch (error) {
+                    console.error('Error generating token:', error);
+                    setError('Failed to login. Please try again.');
+                  }
                 }}
                 style={{
                   padding: '12px',
