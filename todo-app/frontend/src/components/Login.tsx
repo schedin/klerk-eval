@@ -11,6 +11,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [loginInProgress, setLoginInProgress] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -29,6 +30,23 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
 
     fetchUsers();
   }, []);
+
+  const handleLogin = async (username: string) => {
+    setLoginInProgress(username);
+    setError(null);
+
+    try {
+      // Generate JWT token asynchronously
+      const token = await generateToken(username);
+      setAuthToken(token);
+      onLogin(username);
+    } catch (error) {
+      console.error('Error generating token:', error);
+      setError('Failed to login. Please try again.');
+    } finally {
+      setLoginInProgress(null);
+    }
+  };
 
   return (
     <div className="login-container" style={{
@@ -62,30 +80,31 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
             {users.map(user => (
               <button
                 key={user.username}
-                onClick={() => {
-                  try {
-                    const token = generateToken(user.username);
-                    setAuthToken(token);
-                    onLogin(user.username);
-                  } catch (error) {
-                    console.error('Error generating token:', error);
-                    setError('Failed to login. Please try again.');
-                  }
-                }}
+                onClick={() => handleLogin(user.username)}
+                disabled={loginInProgress !== null}
                 style={{
                   padding: '12px',
-                  backgroundColor: '#2196F3',
+                  backgroundColor: loginInProgress === user.username ? '#BBDEFB' : '#2196F3',
                   color: 'white',
                   border: 'none',
                   borderRadius: '4px',
-                  cursor: 'pointer',
+                  cursor: loginInProgress !== null ? 'default' : 'pointer',
                   fontSize: '16px',
-                  transition: 'background-color 0.3s'
+                  transition: 'background-color 0.3s',
+                  position: 'relative'
                 }}
-                onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#1976D2'}
-                onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#2196F3'}
+                onMouseOver={(e) => {
+                  if (loginInProgress === null) {
+                    e.currentTarget.style.backgroundColor = '#1976D2';
+                  }
+                }}
+                onMouseOut={(e) => {
+                  if (loginInProgress === null) {
+                    e.currentTarget.style.backgroundColor = '#2196F3';
+                  }
+                }}
               >
-                {user.username}
+                {loginInProgress === user.username ? 'Logging in...' : user.username}
               </button>
             ))}
           </div>
