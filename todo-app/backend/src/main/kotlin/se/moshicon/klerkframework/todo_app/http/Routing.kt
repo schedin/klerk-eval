@@ -4,6 +4,7 @@ import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
 import com.auth0.jwt.exceptions.JWTVerificationException
 import com.auth0.jwt.interfaces.DecodedJWT
+import com.auth0.jwt.interfaces.JWTVerifier
 import dev.klerkframework.klerk.CustomIdentity
 import dev.klerkframework.klerk.Klerk
 import dev.klerkframework.klerk.SystemIdentity
@@ -20,7 +21,9 @@ import se.moshicon.klerkframework.todo_app.Ctx
 import se.moshicon.klerkframework.todo_app.Data
 
 // JWT configuration constants
-private const val JWT_SECRET = "your-secret-key" // In a real app, this would be in a secure config
+// Note: In this demo, we're using a simplified JWT implementation without real verification
+// In a real app, you would use proper JWT verification with a secure secret key
+private const val JWT_SECRET = "your-secret-key"
 private const val JWT_ISSUER = "todo-app"
 private const val JWT_AUDIENCE = "todo-app-users"
 
@@ -34,9 +37,10 @@ fun Application.configureRouting(klerk: Klerk<Ctx, Data>) {
                     .build()
             )
             validate { credential ->
-                // Accept any valid JWT token
+                // Accept any token that passes our simple verification
                 JWTPrincipal(credential.payload)
             }
+
             challenge { _, _ ->
                 call.respond(HttpStatusCode.Unauthorized, "Token is not valid or has expired")
             }
