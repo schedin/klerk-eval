@@ -1,25 +1,26 @@
 import { Todo } from '../types/todo';
 import { User } from '../types/user';
-import { v4 as uuidv4 } from 'uuid';
+// Removed uuid import as it's not needed in the active application
+// import { v4 as uuidv4 } from 'uuid';
 
 // Initial mock data
 let mockTodos: Todo[] = [
   {
-    todoID: uuidv4(),
+    todoID: '1', // Replaced uuidv4() with static ID
     title: 'Learn React',
     description: 'Study React fundamentals and hooks',
     state: 'Created',
     createdAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString() // 7 days ago
   },
   {
-    todoID: uuidv4(),
+    todoID: '2', // Replaced uuidv4() with static ID
     title: 'Build Todo App',
     description: 'Create a todo application with React and TypeScript',
     state: 'Created',
     createdAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString() // 3 days ago
   },
   {
-    todoID: uuidv4(),
+    todoID: '3', // Replaced uuidv4() with static ID
     title: 'Learn Kotlin',
     description: 'Study Kotlin basics for backend development',
     state: 'Completed',
@@ -67,8 +68,9 @@ export const mockTodoApi = {
   createTodo: async (todoData: { title: string; description: string }): Promise<Todo> => {
     return new Promise((resolve) => {
       setTimeout(() => {
+        // Generate a simple ID based on timestamp
         const newTodo: Todo = {
-          todoID: uuidv4(),
+          todoID: Date.now().toString(), // Replaced uuidv4() with timestamp-based ID
           title: todoData.title,
           description: todoData.description,
           state: 'Created',
