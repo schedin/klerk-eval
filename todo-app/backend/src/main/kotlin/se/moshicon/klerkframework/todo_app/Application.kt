@@ -89,7 +89,6 @@ suspend fun createInitialUsers(klerk: Klerk<Ctx, Data>) {
         list(data.users.all)
     }
     if (users.isEmpty()) {
-
         suspend fun createUser(username: String) {
             val command = Command(
                 event = CreateUser,
