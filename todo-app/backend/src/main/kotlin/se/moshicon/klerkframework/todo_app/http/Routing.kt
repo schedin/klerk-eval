@@ -2,9 +2,6 @@ package se.moshicon.klerkframework.todo_app.http
 
 import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
-import com.auth0.jwt.exceptions.JWTVerificationException
-import com.auth0.jwt.interfaces.DecodedJWT
-import com.auth0.jwt.interfaces.JWTVerifier
 import dev.klerkframework.klerk.*
 import dev.klerkframework.klerk.command.Command
 import dev.klerkframework.klerk.command.CommandToken
@@ -117,25 +114,23 @@ suspend fun ApplicationCall.context(klerk: Klerk<Ctx, Data>): Ctx {
 }
 
 suspend fun findOrCreateUser(klerk: Klerk<Ctx, Data>, username: String): Model<User> {
-    // Find user in database
-    val possibleUser: Model<User>? = klerk.read(Ctx(AuthenticationIdentity)) {
-        firstOrNull(data.users.all) { it.props.name.value == username }
-    }
+    val authContext = Ctx(AuthenticationIdentity)
 
-    if (possibleUser == null) {
-        //Create user in database
+    // Try to find existing user first and return it if found
+    return klerk.read(authContext) {
+        firstOrNull(data.users.all) { it.props.name.value == username }
+    } ?: run {
+        // User not found, create a new one, laying trust in the JWT issuer for what users should exist
         val command = Command(
             event = CreateUser,
             model = null,
             params = CreateUserParams(UserName(username)),
         )
-        klerk.handle(command, Ctx(AuthenticationIdentity), ProcessingOptions(CommandToken.simple()))
-    } else {
-        possibleUser
-    }
+        klerk.handle(command, authContext, ProcessingOptions(CommandToken.simple()))
 
-    val user: Model<User> = klerk.read(Ctx(AuthenticationIdentity)) {
-        getFirstWhere(data.users.all) { it.props.name.value == username }
+        // Return the newly created user
+        klerk.read(authContext) {
+            getFirstWhere(data.users.all) { it.props.name.value == username }
+        }
     }
-    return user
 }
