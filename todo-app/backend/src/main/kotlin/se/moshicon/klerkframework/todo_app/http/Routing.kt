@@ -5,9 +5,10 @@ import com.auth0.jwt.algorithms.Algorithm
 import com.auth0.jwt.exceptions.JWTVerificationException
 import com.auth0.jwt.interfaces.DecodedJWT
 import com.auth0.jwt.interfaces.JWTVerifier
-import dev.klerkframework.klerk.CustomIdentity
-import dev.klerkframework.klerk.Klerk
-import dev.klerkframework.klerk.SystemIdentity
+import dev.klerkframework.klerk.*
+import dev.klerkframework.klerk.command.Command
+import dev.klerkframework.klerk.command.CommandToken
+import dev.klerkframework.klerk.command.ProcessingOptions
 import dev.klerkframework.web.LowCodeConfig
 import dev.klerkframework.web.LowCodeMain
 
@@ -19,6 +20,10 @@ import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import se.moshicon.klerkframework.todo_app.Ctx
 import se.moshicon.klerkframework.todo_app.Data
+import se.moshicon.klerkframework.todo_app.users.CreateUser
+import se.moshicon.klerkframework.todo_app.users.CreateUserParams
+import se.moshicon.klerkframework.todo_app.users.User
+import se.moshicon.klerkframework.todo_app.users.UserName
 
 // JWT configuration constants
 // Note: In this demo, we're using a simplified JWT implementation without real verification
@@ -84,7 +89,7 @@ fun Application.configureRouting(klerk: Klerk<Ctx, Data>) {
  * Creates a Context from a Call.
  * Extracts user information from JWT token if present.
  */
-fun ApplicationCall.context(klerk: Klerk<Ctx, Data>): Ctx {
+suspend fun ApplicationCall.context(klerk: Klerk<Ctx, Data>): Ctx {
     val principal = this.principal<JWTPrincipal>()
 
     return if (principal != null) {
@@ -98,10 +103,9 @@ fun ApplicationCall.context(klerk: Klerk<Ctx, Data>): Ctx {
             } catch (e: Exception) {
                 listOf<String>()
             }
+            val user = findOrCreateUser(klerk, username)
 
-            // Create context with user identity
-            val externalId = 42L
-            Ctx(CustomIdentity(id = null, externalId = externalId))
+            Ctx(CustomIdentity(id = user.id, externalId = null))
         } catch (e: Exception) {
             // Fallback to system identity if JWT parsing fails
             println("Error parsing JWT: ${e.message}")
@@ -111,4 +115,28 @@ fun ApplicationCall.context(klerk: Klerk<Ctx, Data>): Ctx {
         // No JWT token, use system identity
         Ctx(SystemIdentity)
     }
+}
+
+suspend fun findOrCreateUser(klerk: Klerk<Ctx, Data>, username: String): Model<User> {
+    // Find user in database
+    val possibleUser: Model<User>? = klerk.read(Ctx(AuthenticationIdentity)) {
+        firstOrNull(data.users.all) { it.props.name.value == username }
+    }
+
+    if (possibleUser == null) {
+        //Create user in database
+        val command = Command(
+            event = CreateUser,
+            model = null,
+            params = CreateUserParams(UserName(username)),
+        )
+        klerk.handle(command, Ctx(AuthenticationIdentity), ProcessingOptions(CommandToken.simple()))
+    } else {
+        possibleUser
+    }
+
+    val user: Model<User> = klerk.read(Ctx(AuthenticationIdentity)) {
+        getFirstWhere(data.users.all) { it.props.name.value == username }
+    }
+    return user
 }
