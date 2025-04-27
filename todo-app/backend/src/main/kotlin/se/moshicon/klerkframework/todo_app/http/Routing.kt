@@ -17,10 +17,7 @@ import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import se.moshicon.klerkframework.todo_app.Ctx
 import se.moshicon.klerkframework.todo_app.Data
-import se.moshicon.klerkframework.todo_app.users.CreateUser
-import se.moshicon.klerkframework.todo_app.users.CreateUserParams
-import se.moshicon.klerkframework.todo_app.users.User
-import se.moshicon.klerkframework.todo_app.users.UserName
+import se.moshicon.klerkframework.todo_app.users.*
 
 // JWT configuration constants
 // Note: In this demo, we're using a simplified JWT implementation without real verification
@@ -101,7 +98,7 @@ suspend fun ApplicationCall.context(klerk: Klerk<Ctx, Data>): Ctx {
                 listOf<String>()
             }
             val user = findOrCreateUser(klerk, username)
-            Ctx(ModelReferenceIdentity(modelId = user.id))
+            Ctx(GroupModelReferenceIdentity(modelId = user.id, groups = groups))
         } catch (e: Exception) {
             // Fallback to system identity if JWT parsing fails
             println("Error parsing JWT: ${e.message}")
@@ -116,11 +113,11 @@ suspend fun ApplicationCall.context(klerk: Klerk<Ctx, Data>): Ctx {
 suspend fun findOrCreateUser(klerk: Klerk<Ctx, Data>, username: String): Model<User> {
     val authContext = Ctx(AuthenticationIdentity)
 
-    // Try to find existing user first and return it if found
+    // Try to find an existing user and return it if found
     return klerk.read(authContext) {
         firstOrNull(data.users.all) { it.props.name.value == username }
     } ?: run {
-        // User not found, create a new one, laying trust in the JWT issuer for what users should exist
+        // User not found, create a new one, trusting the JWT issuer for what users should exist
         val command = Command(
             event = CreateUser,
             model = null,
