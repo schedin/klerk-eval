@@ -104,8 +104,7 @@ suspend fun ApplicationCall.context(klerk: Klerk<Ctx, Data>): Ctx {
                 listOf<String>()
             }
             val user = findOrCreateUser(klerk, username)
-
-            Ctx(CustomIdentity(id = user.id, externalId = null))
+            Ctx(ModelReferenceIdentity(modelId = user.id))
         } catch (e: Exception) {
             // Fallback to system identity if JWT parsing fails
             println("Error parsing JWT: ${e.message}")
