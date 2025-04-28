@@ -64,6 +64,12 @@ const createApi = () => {
         throw new Error(`HTTP error! Status: ${response.status}`);
       }
 
+      // For 204 No Content responses, don't try to parse JSON
+      if (response.status === 204) {
+        return { success: true };
+      }
+
+      // For other successful responses, parse JSON if there is content
       return { data: await response.json() };
     }
   };
