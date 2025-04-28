@@ -4,6 +4,7 @@ export interface Todo {
   description: string;
   state?: 'Created' | 'Completed' | 'Trashed';
   createdAt?: string; // ISO string format from backend
+  username?: string; // Username of the creator
 }
 
 export interface CreateTodoParams {
