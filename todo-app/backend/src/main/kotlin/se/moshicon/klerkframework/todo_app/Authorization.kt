@@ -83,20 +83,16 @@ fun userCanCreateOwnTodos(args: ArgCommandContextReader<*, Ctx, Data>): Positive
 
 fun userCanModifyOwnTodos(args: ArgCommandContextReader<*, Ctx, Data>): PositiveAuthorization {
     val actor = args.context.actor
-    val commandModel = args.command.model
-    if (actor is GroupModelIdentity) {
-        val loggedInAsUser = actor.model.props.name
-        if (commandModel != null) {
-            val m = args.reader.get(commandModel)
-            val todo = m.props
-            if (todo is Todo ) {
-                if (todo.user.name == loggedInAsUser) {
-                    return Allow
-                }
-            }
-        }
+    val commandModelID = args.command.model
+    if (actor !is GroupModelIdentity || commandModelID == null) {
+        return NoOpinion
     }
-    return NoOpinion
+
+    val loggedInAsUser = actor.model.props.name
+    val todoModel = args.reader.get(commandModelID)
+    val todo = todoModel.props
+
+    return if (todo is Todo && todo.user.name == loggedInAsUser) Allow else NoOpinion
 }
 
 fun unAuthenticatedCanReadUsers(args: ArgModelContextReader<Ctx, Data>): PositiveAuthorization {
