@@ -274,13 +274,7 @@ function App() {
           alignItems: 'center'
         }}>
           <span style={{ marginRight: '10px', fontSize: '20px' }}>⚠️</span>
-          <div>
-            <div style={{ fontWeight: 'bold', marginBottom: '5px' }}>Error:</div>
-            <div>{formError}</div>
-            <div style={{ marginTop: '5px', fontSize: '14px', fontWeight: 'normal' }}>
-              Please correct the title length (maximum 100 characters) and try again.
-            </div>
-          </div>
+          <div>{formError}</div>
         </div>
       )}
 
