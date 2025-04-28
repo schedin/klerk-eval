@@ -52,6 +52,7 @@ data class TodoResponse(
     val description: String,
     val state: String,
     val createdAt: Instant,
+    val username: String,
 )
 
 @Serializable
@@ -63,6 +64,7 @@ fun toTodoResponse(todo: Model<Todo>) = TodoResponse(
     description = todo.props.description.value,
     state = todo.state,
     createdAt = todo.createdAt,
+    username = todo.props.user.name.value
 )
 
 suspend fun getTodos(call: ApplicationCall, klerk: Klerk<Ctx, Data>) {
