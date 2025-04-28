@@ -10,6 +10,7 @@ import dev.klerkframework.klerk.PositiveAuthorization.*
 
 private const val USERS_GROUP = "user"
 private const val ADMINS_GROUP = "admin"
+private const val GUESTS_GROUP = "guest"
 
 fun authorizationRules(): ConfigBuilder.AuthorizationRulesBlock<Ctx, Data>.() -> Unit = {
     commands {
@@ -18,6 +19,7 @@ fun authorizationRules(): ConfigBuilder.AuthorizationRulesBlock<Ctx, Data>.() ->
             rule(::userCanModifyOwnTodos)
         }
         negative {
+            rule(::guestsCanOnlyCreateOneTodo)
         }
     }
     readModels {
@@ -75,7 +77,7 @@ fun userCanReadOwnTodoProps(args: ArgsForPropertyAuth<Ctx, Data>): PositiveAutho
 fun userCanCreateOwnTodos(args: ArgCommandContextReader<*, Ctx, Data>): PositiveAuthorization {
     val actor = args.context.actor
     val createParams = args.command.params
-    if (actor is GroupModelIdentity && actor.groups.contains(USERS_GROUP) &&
+    if (actor is GroupModelIdentity &&
         args.command.event is CreateTodo &&
         createParams is CreateTodoParams &&
         createParams.user == actor.model.props
@@ -83,6 +85,17 @@ fun userCanCreateOwnTodos(args: ArgCommandContextReader<*, Ctx, Data>): Positive
         return Allow
     }
     return NoOpinion
+}
+
+fun guestsCanOnlyCreateOneTodo(args: ArgCommandContextReader<*, Ctx, Data>): NegativeAuthorization {
+    val actor = args.context.actor
+    if (actor is GroupModelIdentity && actor.groups.contains(GUESTS_GROUP) &&  args.command.event is CreateTodo) {
+        val numOfTodosForUser = args.reader.list(args.reader.data.todos.all) {
+            actor.model.props.name == it.props.user.name
+        }.size
+        return if (numOfTodosForUser < 1) NegativeAuthorization.Pass else NegativeAuthorization.Deny
+    }
+    return NegativeAuthorization.Pass
 }
 
 fun userCanModifyOwnTodos(args: ArgCommandContextReader<*, Ctx, Data>): PositiveAuthorization {
