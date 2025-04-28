@@ -68,7 +68,7 @@ fun toTodoResponse(todo: Model<Todo>) = TodoResponse(
 suspend fun getTodos(call: ApplicationCall, klerk: Klerk<Ctx, Data>) {
     val context = call.context(klerk)
     val todos = klerk.read(context) {
-        list(data.todos.all).map { todo -> toTodoResponse(todo) }
+        listIfAuthorized(data.todos.all).map { todo -> toTodoResponse(todo) }
     }
     call.respond(todos)
 }

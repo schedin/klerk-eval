@@ -1,6 +1,5 @@
 package se.moshicon.klerkframework.todo_app
 
-
 import dev.klerkframework.klerk.*
 import se.moshicon.klerkframework.todo_app.notes.CreateTodo
 import se.moshicon.klerkframework.todo_app.notes.CreateTodoParams
@@ -29,7 +28,9 @@ fun authorizationRules(): ConfigBuilder.AuthorizationRulesBlock<Ctx, Data>.() ->
     }
     readProperties {
         positive {
+            rule(::authenticationIdentityCanReadUsersProps)
             rule(::userCanReadOwnTodoProps)
+            rule(::userCanReadOwnUserProps)
             rule(::unAuthenticatedCanReadUsersProps)
         }
         negative {
@@ -46,6 +47,15 @@ fun authorizationRules(): ConfigBuilder.AuthorizationRulesBlock<Ctx, Data>.() ->
 
 fun allCanReadEventLog(@Suppress("UNUSED_PARAMETER") args: ArgContextReader<Ctx, Data>): PositiveAuthorization {
     return Allow
+}
+
+fun userCanReadOwnUserProps(args: ArgsForPropertyAuth<Ctx, Data>): PositiveAuthorization {
+    val actor = args.context.actor
+    val user = args.model.props
+    if (actor is GroupModelIdentity && user is User && user == actor.model.props) {
+        return Allow
+    }
+    return NoOpinion
 }
 
 fun userCanReadOwnTodoProps(args: ArgsForPropertyAuth<Ctx, Data>): PositiveAuthorization {
@@ -88,6 +98,15 @@ fun unAuthenticatedCanReadUsersProps(args: ArgsForPropertyAuth<Ctx, Data>): Posi
 
 fun authenticationIdentityCanReadUsers(args: ArgModelContextReader<Ctx, Data>): PositiveAuthorization {
     if (args.context.actor == AuthenticationIdentity && args.model.props is User) {
+        return Allow
+    }
+    return NoOpinion
+}
+
+fun authenticationIdentityCanReadUsersProps(args: ArgsForPropertyAuth<Ctx, Data>): PositiveAuthorization {
+    val actor = args.context.actor
+    val user = args.model.props
+    if (actor is AuthenticationIdentity && user is User) {
         return Allow
     }
     return NoOpinion
