@@ -8,6 +8,8 @@ import se.moshicon.klerkframework.todo_app.users.GroupModelIdentity
 import se.moshicon.klerkframework.todo_app.users.User
 import dev.klerkframework.klerk.PositiveAuthorization.*
 
+private const val USERS_GROUP = "user"
+private const val ADMINS_GROUP = "admin"
 
 fun authorizationRules(): ConfigBuilder.AuthorizationRulesBlock<Ctx, Data>.() -> Unit = {
     commands {
@@ -73,8 +75,8 @@ fun userCanReadOwnTodoProps(args: ArgsForPropertyAuth<Ctx, Data>): PositiveAutho
 fun userCanCreateOwnTodos(args: ArgCommandContextReader<*, Ctx, Data>): PositiveAuthorization {
     val actor = args.context.actor
     val createParams = args.command.params
-
-    if (actor is GroupModelIdentity && args.command.event is CreateTodo &&
+    if (actor is GroupModelIdentity && actor.groups.contains(USERS_GROUP) &&
+        args.command.event is CreateTodo &&
         createParams is CreateTodoParams &&
         createParams.user == actor.model.props
     ) {
@@ -89,7 +91,6 @@ fun userCanModifyOwnTodos(args: ArgCommandContextReader<*, Ctx, Data>): Positive
     if (actor !is GroupModelIdentity || commandModelID == null) {
         return NoOpinion
     }
-
     val loggedInAsUser = actor.model.props.name
     val todoModel = args.reader.get(commandModelID)
     val todo = todoModel.props
@@ -116,7 +117,7 @@ fun unAuthenticatedCanReadUsersProps(args: ArgsForPropertyAuth<Ctx, Data>): Posi
 fun adminGroupCanReadAllTodoProps(args: ArgsForPropertyAuth<Ctx, Data>): PositiveAuthorization {
     val actor = args.context.actor
     val todo = args.model.props
-    if (actor is GroupModelIdentity && actor.groups.contains("admin") && todo is Todo) {
+    if (actor is GroupModelIdentity && actor.groups.contains(ADMINS_GROUP) && todo is Todo) {
         return Allow
     }
     return NoOpinion
