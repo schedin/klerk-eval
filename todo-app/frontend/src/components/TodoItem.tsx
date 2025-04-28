@@ -8,9 +8,10 @@ interface TodoItemProps {
   onTrash: (id: string) => void;
   onDelete: (id: string) => void;
   onUntrash: (id: string) => void;
+  error?: string;
 }
 
-const TodoItem: React.FC<TodoItemProps> = ({ todo, onComplete, onUncomplete, onTrash, onDelete, onUntrash }) => {
+const TodoItem: React.FC<TodoItemProps> = ({ todo, onComplete, onUncomplete, onTrash, onDelete, onUntrash, error }) => {
   return (
     <div className="todo-item" style={{
       border: '1px solid #ddd',
@@ -19,18 +20,36 @@ const TodoItem: React.FC<TodoItemProps> = ({ todo, onComplete, onUncomplete, onT
       marginBottom: '10px',
       backgroundColor: todo.state === 'Completed' ? '#f0fff0' : '#fff'
     }}>
-      <h3>{todo.title}</h3>
-      <p>{todo.description}</p>
-      <div style={{ fontSize: '0.8rem', color: '#666', marginTop: '5px' }}>
-        {todo.createdAt && (
-          <p style={{ margin: '0 0 3px 0' }}>
-            Created: {new Date(todo.createdAt).toLocaleString()}
-          </p>
-        )}
-        {todo.username && (
-          <p style={{ margin: '0' }}>
-            Created by: {todo.username}
-          </p>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+        <div>
+          <h3>{todo.title}</h3>
+          <p>{todo.description}</p>
+          <div style={{ fontSize: '0.8rem', color: '#666', marginTop: '5px' }}>
+            {todo.createdAt && (
+              <p style={{ margin: '0 0 3px 0' }}>
+                Created: {new Date(todo.createdAt).toLocaleString()}
+              </p>
+            )}
+            {todo.username && (
+              <p style={{ margin: '0' }}>
+                Created by: {todo.username}
+              </p>
+            )}
+          </div>
+        </div>
+        {error && (
+          <div style={{
+            backgroundColor: '#ffebee',
+            color: '#c62828',
+            padding: '8px 12px',
+            borderRadius: '4px',
+            fontSize: '0.9rem',
+            marginLeft: '10px',
+            maxWidth: '250px',
+            border: '1px solid #ef9a9a'
+          }}>
+            {error}
+          </div>
         )}
       </div>
       <div className="todo-actions" style={{ marginTop: '10px', display: 'flex', gap: '10px' }}>

@@ -61,7 +61,10 @@ const createApi = () => {
       });
 
       if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`);
+        const errorText = await response.text();
+        const error = new Error(errorText);
+        (error as any).response = { data: errorText };
+        throw error;
       }
 
       // For 204 No Content responses, don't try to parse JSON
@@ -139,35 +142,35 @@ export const todoApi = {
   },
 
   // Mark a todo as complete
-  markComplete: async (id: string): Promise<Todo | null> => {
+  markComplete: async (id: string): Promise<Todo> => {
     try {
       const response = await api.post(`/todos/${id}/complete`);
       return response.data;
-    } catch (error) {
+    } catch (error: any) {
       console.error(`Error marking todo ${id} as complete:`, error);
-      return null;
+      throw error; // Propagate the error to be handled by the caller
     }
   },
 
   // Mark a todo as uncomplete (revert from completed state)
-  markUncomplete: async (id: string): Promise<Todo | null> => {
+  markUncomplete: async (id: string): Promise<Todo> => {
     try {
       const response = await api.post(`/todos/${id}/uncomplete`);
       return response.data;
-    } catch (error) {
+    } catch (error: any) {
       console.error(`Error marking todo ${id} as uncomplete:`, error);
-      return null;
+      throw error; // Propagate the error to be handled by the caller
     }
   },
 
   // Move a todo to trash
-  moveToTrash: async (id: string): Promise<Todo | null> => {
+  moveToTrash: async (id: string): Promise<Todo> => {
     try {
       const response = await api.post(`/todos/${id}/trash`);
       return response.data;
-    } catch (error) {
+    } catch (error: any) {
       console.error(`Error moving todo ${id} to trash:`, error);
-      return null;
+      throw error; // Propagate the error to be handled by the caller
     }
   },
 
@@ -176,20 +179,20 @@ export const todoApi = {
     try {
       await api.delete(`/todos/${id}`);
       return true;
-    } catch (error) {
+    } catch (error: any) {
       console.error(`Error deleting todo ${id}:`, error);
-      return false;
+      throw error; // Propagate the error to be handled by the caller
     }
   },
 
   // Recover a todo from trash
-  untrashTodo: async (id: string): Promise<Todo | null> => {
+  untrashTodo: async (id: string): Promise<Todo> => {
     try {
       const response = await api.post(`/todos/${id}/untrash`);
       return response.data;
-    } catch (error) {
+    } catch (error: any) {
       console.error(`Error recovering todo ${id} from trash:`, error);
-      return null;
+      throw error; // Propagate the error to be handled by the caller
     }
   },
 };

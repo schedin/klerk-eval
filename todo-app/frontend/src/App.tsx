@@ -6,7 +6,7 @@ import { todoApi, userApi } from './services/api';
 import TodoList from './components/TodoList';
 import TodoForm from './components/TodoForm';
 import Login from './components/Login';
-import { getCurrentUser, removeAuthToken } from './services/auth';
+import { getCurrentUser, removeAuthToken, isAdmin } from './services/auth';
 
 function App() {
   const [currentUser, setCurrentUser] = useState<string | null>(
@@ -17,6 +17,8 @@ function App() {
   const [error, setError] = useState<string | null>(null);
   const [filter, setFilter] = useState<string>('all');
   const [formError, setFormError] = useState<string | null>(null);
+  // Track errors for individual todo items
+  const [todoErrors, setTodoErrors] = useState<Record<string, string>>({});
 
   // Fetch todos on component mount if user is logged in
   useEffect(() => {
@@ -25,12 +27,24 @@ function App() {
     }
   }, [currentUser]);
 
+  // Helper function to clear error for a specific todo
+  const clearTodoError = (todoId: string) => {
+    setTodoErrors(prev => {
+      const newErrors = { ...prev };
+      delete newErrors[todoId];
+      return newErrors;
+    });
+  };
+
   const fetchTodos = async () => {
     setLoading(true);
+    // Clear all errors when fetching todos
+    setError(null);
+    setTodoErrors({});
+
     try {
       const data = await todoApi.getAllTodos();
       setTodos(data);
-      setError(null);
     } catch (err) {
       setError('Failed to fetch todos. Please try again later.');
       console.error('Error fetching todos:', err);
@@ -41,6 +55,8 @@ function App() {
 
   const handleCreateTodo = async (todoData: CreateTodoParams) => {
     setFormError(null); // Clear previous form errors
+    setTodoErrors({}); // Clear all todo errors when creating a new todo
+
     try {
       const newTodo = await todoApi.createTodo(todoData);
       setTodos([...todos, newTodo]);
@@ -55,6 +71,9 @@ function App() {
   };
 
   const handleCompleteTodo = async (id: string) => {
+    // Clear any existing error for this todo
+    clearTodoError(id);
+
     try {
       const updatedTodo = await todoApi.markComplete(id);
       if (updatedTodo) {
@@ -62,13 +81,26 @@ function App() {
           todo.todoID === id ? { ...todo, state: 'Completed' } : todo
         ));
       }
-    } catch (err) {
-      setError('Failed to mark todo as complete. Please try again.');
+    } catch (err: any) {
+      // If admin is trying to modify another user's todo, show error on the todo item
+      if (isAdmin()) {
+        const errorMessage = err.message || 'Failed to mark todo as complete.';
+        setTodoErrors(prev => ({
+          ...prev,
+          [id]: errorMessage
+        }));
+      } else {
+        // For non-admin users, show global error
+        setError('Failed to mark todo as complete. Please try again.');
+      }
       console.error('Error completing todo:', err);
     }
   };
 
   const handleTrashTodo = async (id: string) => {
+    // Clear any existing error for this todo
+    clearTodoError(id);
+
     try {
       const trashedTodo = await todoApi.moveToTrash(id);
       if (trashedTodo) {
@@ -76,13 +108,26 @@ function App() {
           todo.todoID === id ? { ...todo, state: 'Trashed' } : todo
         ));
       }
-    } catch (err) {
-      setError('Failed to move todo to trash. Please try again.');
+    } catch (err: any) {
+      // If admin is trying to modify another user's todo, show error on the todo item
+      if (isAdmin()) {
+        const errorMessage = err.message || 'Failed to move todo to trash.';
+        setTodoErrors(prev => ({
+          ...prev,
+          [id]: errorMessage
+        }));
+      } else {
+        // For non-admin users, show global error
+        setError('Failed to move todo to trash. Please try again.');
+      }
       console.error('Error trashing todo:', err);
     }
   };
 
   const handleUncompleteTodo = async (id: string) => {
+    // Clear any existing error for this todo
+    clearTodoError(id);
+
     try {
       const updatedTodo = await todoApi.markUncomplete(id);
       if (updatedTodo) {
@@ -90,13 +135,26 @@ function App() {
           todo.todoID === id ? { ...todo, state: 'Created' } : todo
         ));
       }
-    } catch (err) {
-      setError('Failed to mark todo as uncomplete. Please try again.');
+    } catch (err: any) {
+      // If admin is trying to modify another user's todo, show error on the todo item
+      if (isAdmin()) {
+        const errorMessage = err.message || 'Failed to mark todo as uncomplete.';
+        setTodoErrors(prev => ({
+          ...prev,
+          [id]: errorMessage
+        }));
+      } else {
+        // For non-admin users, show global error
+        setError('Failed to mark todo as uncomplete. Please try again.');
+      }
       console.error('Error uncompleting todo:', err);
     }
   };
 
   const handleUntrashTodo = async (id: string) => {
+    // Clear any existing error for this todo
+    clearTodoError(id);
+
     try {
       const recoveredTodo = await todoApi.untrashTodo(id);
       if (recoveredTodo) {
@@ -104,21 +162,44 @@ function App() {
           todo.todoID === id ? { ...todo, state: 'Created' } : todo
         ));
       }
-    } catch (err) {
-      setError('Failed to recover todo from trash. Please try again.');
+    } catch (err: any) {
+      // If admin is trying to modify another user's todo, show error on the todo item
+      if (isAdmin()) {
+        const errorMessage = err.message || 'Failed to recover todo from trash.';
+        setTodoErrors(prev => ({
+          ...prev,
+          [id]: errorMessage
+        }));
+      } else {
+        // For non-admin users, show global error
+        setError('Failed to recover todo from trash. Please try again.');
+      }
       console.error('Error recovering todo:', err);
     }
   };
 
   const handleDeleteTodo = async (id: string) => {
+    // Clear any existing error for this todo
+    clearTodoError(id);
+
     try {
       const success = await todoApi.deleteTodo(id);
       if (success) {
         // Remove the todo from the list
         setTodos(todos.filter(todo => todo.todoID !== id));
       }
-    } catch (err) {
-      setError('Failed to delete todo. Please try again.');
+    } catch (err: any) {
+      // If admin is trying to modify another user's todo, show error on the todo item
+      if (isAdmin()) {
+        const errorMessage = err.message || 'Failed to delete todo.';
+        setTodoErrors(prev => ({
+          ...prev,
+          [id]: errorMessage
+        }));
+      } else {
+        // For non-admin users, show global error
+        setError('Failed to delete todo. Please try again.');
+      }
       console.error('Error deleting todo:', err);
     }
   };
@@ -208,7 +289,10 @@ function App() {
       <div style={{ marginBottom: '20px' }}>
         <div style={{ display: 'flex', gap: '10px', marginBottom: '20px' }}>
           <button
-            onClick={() => setFilter('all')}
+            onClick={() => {
+              setFilter('all');
+              setTodoErrors({}); // Clear todo errors when changing filter
+            }}
             style={{
               backgroundColor: filter === 'all' ? '#2196F3' : '#e0e0e0',
               color: filter === 'all' ? 'white' : 'black',
@@ -221,7 +305,10 @@ function App() {
             All
           </button>
           <button
-            onClick={() => setFilter('active')}
+            onClick={() => {
+              setFilter('active');
+              setTodoErrors({}); // Clear todo errors when changing filter
+            }}
             style={{
               backgroundColor: filter === 'active' ? '#2196F3' : '#e0e0e0',
               color: filter === 'active' ? 'white' : 'black',
@@ -234,7 +321,10 @@ function App() {
             Active
           </button>
           <button
-            onClick={() => setFilter('completed')}
+            onClick={() => {
+              setFilter('completed');
+              setTodoErrors({}); // Clear todo errors when changing filter
+            }}
             style={{
               backgroundColor: filter === 'completed' ? '#2196F3' : '#e0e0e0',
               color: filter === 'completed' ? 'white' : 'black',
@@ -247,7 +337,10 @@ function App() {
             Completed
           </button>
           <button
-            onClick={() => setFilter('trashed')}
+            onClick={() => {
+              setFilter('trashed');
+              setTodoErrors({}); // Clear todo errors when changing filter
+            }}
             style={{
               backgroundColor: filter === 'trashed' ? '#2196F3' : '#e0e0e0',
               color: filter === 'trashed' ? 'white' : 'black',
@@ -273,6 +366,7 @@ function App() {
           onDelete={handleDeleteTodo}
           onUntrash={handleUntrashTodo}
           filter={filter}
+          todoErrors={todoErrors}
         />
       )}
     </div>
