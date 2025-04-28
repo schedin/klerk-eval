@@ -18,6 +18,8 @@ import kotlinx.datetime.Instant
 import kotlinx.serialization.Serializable
 import se.moshicon.klerkframework.todo_app.*
 import se.moshicon.klerkframework.todo_app.notes.*
+import se.moshicon.klerkframework.todo_app.users.GroupModelIdentity
+import se.moshicon.klerkframework.todo_app.users.User
 
 fun registerTodoRoutes(klerk: Klerk<Ctx, Data>): Route.() -> Unit = {
     get("/{...}") {
@@ -75,12 +77,16 @@ suspend fun createTodo(call: ApplicationCall, klerk: Klerk<Ctx, Data>) {
     val context = call.context(klerk)
     val params = call.receive<CreateTodoRequest>()
 
+    val user = (context.actor as? GroupModelIdentity)?.model?.props
+        ?: throw IllegalStateException("User not found in context")
+
     val command = Command(
         event = CreateTodo,
         model = null,
         params = CreateTodoParams(
             title = TodoTitle(params.title),
             description = TodoDescription(params.description),
+            user = user
         ),
     )
     when(val result = klerk.handle(command, context, ProcessingOptions(CommandToken.simple()))) {

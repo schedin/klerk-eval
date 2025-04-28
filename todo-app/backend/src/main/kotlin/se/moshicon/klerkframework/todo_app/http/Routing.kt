@@ -69,9 +69,9 @@ fun Application.configureRouting(klerk: Klerk<Ctx, Data>) {
             }
         }
 
-        route("/custom") {
-            apply(registerFullControlModeRoutes(klerk))
-        }
+//        route("/custom") {
+//            apply(registerFullControlModeRoutes(klerk))
+//        }
 
         // The auto-generated Admin UI
         val autoAdminUI = LowCodeMain(klerk, lowCodeConfig)
@@ -98,15 +98,15 @@ suspend fun ApplicationCall.context(klerk: Klerk<Ctx, Data>): Ctx {
                 listOf<String>()
             }
             val user = findOrCreateUser(klerk, username)
-            Ctx(GroupModelReferenceIdentity(modelId = user.id, groups = groups))
+            Ctx(GroupModelIdentity(model = user, groups = groups))
         } catch (e: Exception) {
             // Fallback to system identity if JWT parsing fails
             println("Error parsing JWT: ${e.message}")
-            Ctx(SystemIdentity)
+            Ctx(Unauthenticated)
         }
     } else {
-        // No JWT token, use system identity
-        Ctx(SystemIdentity)
+        // No JWT token, use unauthenticated identity
+        Ctx(Unauthenticated)
     }
 }
 

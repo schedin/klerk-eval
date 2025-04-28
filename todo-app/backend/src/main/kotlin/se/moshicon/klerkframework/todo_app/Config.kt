@@ -21,15 +21,9 @@ class Ctx(
 
 fun createConfig() = ConfigBuilder<Ctx, Data>(Data).build {
     authorization {
-        //apply(insecureAllowEverything())
-
-        positive {
-            rule(::syste)
-        }
-        negative {
-        }
-
+        apply(authorizationRules())
     }
+
     managedModels {
         model(Todo::class, todoStateMachine, Data.todos)
         model(User::class, userStateMachine, Data.users)
