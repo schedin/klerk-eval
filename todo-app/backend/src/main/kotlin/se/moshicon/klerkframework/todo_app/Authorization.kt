@@ -87,6 +87,7 @@ fun userCanCreateOwnTodos(args: ArgCommandContextReader<*, Ctx, Data>): Positive
     return NoOpinion
 }
 
+@HumanReadable("You can only create one TODO as guest. Please buy premium!")
 fun guestsCanOnlyCreateOneTodo(args: ArgCommandContextReader<*, Ctx, Data>): NegativeAuthorization {
     val actor = args.context.actor
     if (actor is GroupModelIdentity && actor.groups.contains(GUESTS_GROUP) &&  args.command.event is CreateTodo) {

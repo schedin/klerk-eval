@@ -7,7 +7,8 @@ import se.moshicon.klerkframework.todo_app.Ctx
 import se.moshicon.klerkframework.todo_app.Data
 
 enum class UserStates {
-    Created
+    Created,
+    ToBeDeleted,
 }
 
 val userStateMachine = stateMachine {
@@ -22,8 +23,8 @@ val userStateMachine = stateMachine {
 
     state(UserStates.Created) {
         onEvent(DeleteUser) {
-            delete()
             //TODO: Also delete all todos created by this user
+            delete()
         }
     }
 }
