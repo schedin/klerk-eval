@@ -13,6 +13,7 @@ fun authorizationRules(): ConfigBuilder.AuthorizationRulesBlock<Ctx, Data>.() ->
     commands {
         positive {
             rule(::userCanCreateOwnTodos)
+            rule(::userCanModifyOwnTodos)
         }
         negative {
         }
@@ -75,6 +76,23 @@ fun userCanCreateOwnTodos(args: ArgCommandContextReader<*, Ctx, Data>): Positive
         createParams is CreateTodoParams &&
         createParams.user == actor.model.props
     ) {
+        return Allow
+    }
+    return NoOpinion
+}
+
+fun userCanModifyOwnTodos(args: ArgCommandContextReader<*, Ctx, Data>): PositiveAuthorization {
+    val actor = args.context.actor
+    val commandModel = args.command.model
+    println(commandModel)
+    if (actor is GroupModelIdentity) {
+        val loggedInAsUser = actor.model.props.name
+        println(loggedInAsUser)
+
+        if (commandModel is ModelID<*>)
+            val todoModel = args.reader.get <Todo> ( commandModel)
+        }
+
         return Allow
     }
     return NoOpinion
