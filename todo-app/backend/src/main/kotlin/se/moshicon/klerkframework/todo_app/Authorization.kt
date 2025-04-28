@@ -1,11 +1,13 @@
 package se.moshicon.klerkframework.todo_app
 
+
 import dev.klerkframework.klerk.*
 import se.moshicon.klerkframework.todo_app.notes.CreateTodo
 import se.moshicon.klerkframework.todo_app.notes.CreateTodoParams
 import se.moshicon.klerkframework.todo_app.notes.Todo
 import se.moshicon.klerkframework.todo_app.users.GroupModelIdentity
 import se.moshicon.klerkframework.todo_app.users.User
+import dev.klerkframework.klerk.PositiveAuthorization.*
 
 
 fun authorizationRules(): ConfigBuilder.AuthorizationRulesBlock<Ctx, Data>.() -> Unit = {
@@ -18,6 +20,7 @@ fun authorizationRules(): ConfigBuilder.AuthorizationRulesBlock<Ctx, Data>.() ->
     }
     readModels {
         positive {
+            rule(::unAuthenticatedCanReadUsers)
             rule(::authenticationIdentityCanReadUsers)
             rule(::userCanReadOwnTodos)
         }
@@ -26,7 +29,8 @@ fun authorizationRules(): ConfigBuilder.AuthorizationRulesBlock<Ctx, Data>.() ->
     }
     readProperties {
         positive {
-            rule(::userCanReadOwnTodoProperty)
+            rule(::userCanReadOwnTodoProps)
+            rule(::unAuthenticatedCanReadUsersProps)
         }
         negative {
         }
@@ -40,16 +44,17 @@ fun authorizationRules(): ConfigBuilder.AuthorizationRulesBlock<Ctx, Data>.() ->
     }
 }
 
-fun allCanReadEventLog(argContextReader: ArgContextReader<Ctx, Data>): PositiveAuthorization {
-    return PositiveAuthorization.Allow
+fun allCanReadEventLog(@Suppress("UNUSED_PARAMETER") args: ArgContextReader<Ctx, Data>): PositiveAuthorization {
+    return Allow
 }
 
-fun userCanReadOwnTodoProperty(args: ArgsForPropertyAuth<Ctx, Data>): PositiveAuthorization {
+fun userCanReadOwnTodoProps(args: ArgsForPropertyAuth<Ctx, Data>): PositiveAuthorization {
     val actor = args.context.actor
-    if (actor is GroupModelIdentity) {
-        // Add property-specific authorization logic here if needed
+    val todo = args.model.props
+    if (actor is GroupModelIdentity && todo is Todo && todo.user == actor.model.props) {
+        return Allow
     }
-    return PositiveAuthorization.NoOpinion
+    return NoOpinion
 }
 
 fun userCanCreateOwnTodos(args: ArgCommandContextReader<*, Ctx, Data>): PositiveAuthorization {
@@ -60,23 +65,39 @@ fun userCanCreateOwnTodos(args: ArgCommandContextReader<*, Ctx, Data>): Positive
         createParams is CreateTodoParams &&
         createParams.user == actor.model.props
     ) {
-        return PositiveAuthorization.Allow
+        return Allow
     }
-    return PositiveAuthorization.NoOpinion
+    return NoOpinion
+}
+
+fun unAuthenticatedCanReadUsers(args: ArgModelContextReader<Ctx, Data>): PositiveAuthorization {
+    if (args.context.actor == Unauthenticated && args.model.props is User) {
+        return Allow
+    }
+    return NoOpinion
+}
+
+fun unAuthenticatedCanReadUsersProps(args: ArgsForPropertyAuth<Ctx, Data>): PositiveAuthorization {
+    val actor = args.context.actor
+    val user = args.model.props
+    if (actor is Unauthenticated && user is User) {
+        return Allow
+    }
+    return NoOpinion
 }
 
 fun authenticationIdentityCanReadUsers(args: ArgModelContextReader<Ctx, Data>): PositiveAuthorization {
     if (args.context.actor == AuthenticationIdentity && args.model.props is User) {
-        return PositiveAuthorization.Allow
+        return Allow
     }
-    return PositiveAuthorization.NoOpinion
+    return NoOpinion
 }
 
 fun userCanReadOwnTodos(args: ArgModelContextReader<Ctx, Data>): PositiveAuthorization {
     val actor = args.context.actor
     val todo = args.model.props
     if (actor is GroupModelIdentity && todo is Todo && todo.user == actor.model.props) {
-        return PositiveAuthorization.Allow
+        return Allow
     }
-    return PositiveAuthorization.NoOpinion
+    return NoOpinion
 }
