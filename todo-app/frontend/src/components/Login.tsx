@@ -91,7 +91,10 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
                   cursor: loginInProgress !== null ? 'default' : 'pointer',
                   fontSize: '16px',
                   transition: 'background-color 0.3s',
-                  position: 'relative'
+                  position: 'relative',
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center'
                 }}
                 onMouseOver={(e) => {
                   if (loginInProgress === null) {
@@ -104,7 +107,25 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
                   }
                 }}
               >
-                {loginInProgress === user.username ? 'Logging in...' : user.username}
+                <span>{loginInProgress === user.username ? 'Logging in...' : user.username}</span>
+                <div style={{ display: 'flex', gap: '4px' }}>
+                  {user.groups?.map((group: string, index: number) => (
+                    <span
+                      key={index}
+                      style={{
+                        backgroundColor: group === 'admin' ? '#ff9800' :
+                                        group === 'user' ? '#4caf50' : '#9e9e9e',
+                        color: 'white',
+                        padding: '2px 6px',
+                        borderRadius: '10px',
+                        fontSize: '12px',
+                        fontWeight: 'bold'
+                      }}
+                    >
+                      {group}
+                    </span>
+                  ))}
+                </div>
               </button>
             ))}
           </div>

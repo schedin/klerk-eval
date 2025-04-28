@@ -83,7 +83,15 @@ export const userApi = {
   getAllUsers: async (): Promise<User[]> => {
     try {
       const response = await api.get('/users');
-      return response.data;
+
+      // Import userGroups here to avoid circular dependency
+      const { userGroups } = await import('./auth');
+
+      // Add groups to each user
+      return response.data.map((user: User) => ({
+        ...user,
+        groups: userGroups[user.username] || []
+      }));
     } catch (error) {
       console.error('Error fetching users:', error);
       return [];

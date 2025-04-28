@@ -3,7 +3,7 @@ import { jwtDecode } from 'jwt-decode';
 import * as jose from 'jose';
 
 // Define user roles/groups
-const userGroups: Record<string, string[]> = {
+export const userGroups: Record<string, string[]> = {
   'Alice': ['admin', 'user'],
   'Bob': ['user'],
   'Charlie': ['guest']
