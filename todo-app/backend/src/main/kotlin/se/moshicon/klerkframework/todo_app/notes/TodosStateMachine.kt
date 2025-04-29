@@ -9,6 +9,7 @@ import kotlinx.datetime.Instant
 import se.moshicon.klerkframework.todo_app.Ctx
 import se.moshicon.klerkframework.todo_app.Data
 import se.moshicon.klerkframework.todo_app.notes.TodoStates.*
+import se.moshicon.klerkframework.todo_app.users.GroupModelIdentity
 import se.moshicon.klerkframework.todo_app.users.User
 import kotlin.time.Duration.Companion.days
 
@@ -67,10 +68,14 @@ val todoStateMachine = stateMachine {
 object CreateTodo : VoidEventWithParameters<Todo, CreateTodoParams>(Todo::class, true, CreateTodoParams::class)
 class CreateTodoParams(val title: TodoTitle, val description: TodoDescription, val user: User)
 fun createTodo(args: ArgForVoidEvent<Todo, CreateTodoParams, Ctx, Data>): Todo {
+    val actor = args.context.actor
+    if (actor !is GroupModelIdentity) {
+        throw IllegalStateException("Actor must be a GroupModelIdentity")
+    }
     return Todo(
         title = args.command.params.title,
         description = args.command.params.description,
-        user = args.command.params.user,
+        userID = actor.id,
     )
 }
 

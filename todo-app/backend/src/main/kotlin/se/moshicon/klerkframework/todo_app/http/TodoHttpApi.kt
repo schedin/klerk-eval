@@ -19,7 +19,6 @@ import kotlinx.serialization.Serializable
 import se.moshicon.klerkframework.todo_app.*
 import se.moshicon.klerkframework.todo_app.notes.*
 import se.moshicon.klerkframework.todo_app.users.GroupModelIdentity
-import se.moshicon.klerkframework.todo_app.users.User
 
 fun registerTodoRoutes(klerk: Klerk<Ctx, Data>): Route.() -> Unit = {
     get("/{...}") {
@@ -58,13 +57,13 @@ data class TodoResponse(
 @Serializable
 data class CreateTodoRequest(val title: String, val description: String)
 
-fun toTodoResponse(todo: Model<Todo>) = TodoResponse(
+fun toTodoResponse(todo: Model<Todo>, username: String) = TodoResponse(
     todoID = todo.id.toString(),
     title = todo.props.title.value,
     description = todo.props.description.value,
     state = todo.state,
     createdAt = todo.createdAt,
-    username = todo.props.user.name.value
+    username = username
 )
 
 suspend fun getTodos(call: ApplicationCall, klerk: Klerk<Ctx, Data>) {
@@ -99,7 +98,7 @@ suspend fun createTodo(call: ApplicationCall, klerk: Klerk<Ctx, Data>) {
             val createdTodo = klerk.read(context) {
                 get(result.primaryModel!!)
             }
-            call.respond(HttpStatusCode.Created, toTodoResponse(createdTodo))
+            call.respond(HttpStatusCode.Created, toTodoResponse(createdTodo, user.name.value))
         }
     }
 }
@@ -108,7 +107,7 @@ suspend fun handleTodoCommand(
     call: ApplicationCall,
     klerk: Klerk<Ctx, Data>,
     event: InstanceEventNoParameters<Todo>,
-    onSuccess: suspend (s: Model<Todo>) -> Unit = {},
+    onSuccess: suspend (s: Model<Todo>, username: String) -> Unit = { _, _ -> },
 ) {
     val todoID = call.parameters["todoID"] ?: throw IllegalArgumentException("todoID is required")
     val context = call.context(klerk)
@@ -126,7 +125,11 @@ suspend fun handleTodoCommand(
             val modifiedTodo = klerk.read(context) {
                 getOrNull(result.primaryModel!!)
             } ?: todo
-            onSuccess(modifiedTodo)
+
+            val user = klerk.read(context) {
+                get(modifiedTodo.props.userID)
+            }
+            onSuccess(modifiedTodo, user.props.name.value)
         }
     }
 }
