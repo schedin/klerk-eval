@@ -69,11 +69,9 @@ private fun toTodoResponse(todo: Model<Todo>, username: String) = TodoResponse(
 suspend fun getTodos(call: ApplicationCall, klerk: Klerk<Ctx, Data>) {
     val context = call.context(klerk)
     val todos = klerk.read(context) {
-        listIfAuthorized(data.todos.all).map {
-            val username = klerk.read(context) {
-                get(it.props.userID).props.name.value
-            }
-            toTodoResponse(it, username)
+        listIfAuthorized(data.todos.all).map { todo ->
+            val username = get(todo.props.userID).props.name.value
+            toTodoResponse(todo, username)
         }
     }
     call.respond(todos)

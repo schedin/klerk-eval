@@ -29,6 +29,7 @@ fun authorizationRules(): ConfigBuilder.AuthorizationRulesBlock<Ctx, Data>.() ->
             rule(::unAuthenticatedCanReadUsers)
             rule(::authenticationIdentityCanReadUsers)
             rule(::userCanReadOwnTodos)
+            rule(::userCanReadOwnUser)
             rule(::adminGroupCanReadAllTodos)
         }
         negative {
@@ -131,7 +132,6 @@ fun userCanModifyOwnTodos(args: ArgCommandContextReader<*, Ctx, Data>): Positive
     if (actor !is GroupModelIdentity || commandModelID == null) {
         return NoOpinion
     }
-    val loggedInAsUser = actor.model.props.name
     val todoModel = args.reader.get(commandModelID)
     val todo = todoModel.props
 
@@ -174,6 +174,15 @@ fun authenticationIdentityCanReadUsersProps(args: ArgsForPropertyAuth<Ctx, Data>
     val actor = args.context.actor
     val user = args.model.props
     if (actor is AuthenticationIdentity && user is User) {
+        return Allow
+    }
+    return NoOpinion
+}
+
+fun userCanReadOwnUser(args: ArgModelContextReader<Ctx, Data>): PositiveAuthorization {
+    val actor = args.context.actor
+    val userModel = args.model
+    if (actor is GroupModelIdentity && userModel.props is User && userModel.id == actor.id) {
         return Allow
     }
     return NoOpinion
