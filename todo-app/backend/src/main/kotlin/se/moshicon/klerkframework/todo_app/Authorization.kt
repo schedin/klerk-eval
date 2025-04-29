@@ -19,7 +19,7 @@ fun authorizationRules(): ConfigBuilder.AuthorizationRulesBlock<Ctx, Data>.() ->
         positive {
             rule(::userCanCreateOwnTodos)
             rule(::userCanModifyOwnTodos)
-            rule(::authenticationIdentityCanModifyUsers)
+            rule(::unAuthenticatedCanModifyUsers)
         }
         negative {
             rule(::guestsCanOnlyCreateOneTodo)
@@ -56,12 +56,12 @@ fun authorizationRules(): ConfigBuilder.AuthorizationRulesBlock<Ctx, Data>.() ->
 }
 
 /**
- * Normally the AuthenticationIdentity would not be able to modify users. But since the browser is simulating the IdP,
+ * Normally you should have some protection to be able to modify users. But since the browser is simulating the IdP,
  * we allow it.
  */
-fun authenticationIdentityCanModifyUsers(args: ArgCommandContextReader<*, Ctx, Data>): PositiveAuthorization {
+fun unAuthenticatedCanModifyUsers(args: ArgCommandContextReader<*, Ctx, Data>): PositiveAuthorization {
     val actor = args.context.actor
-    if (actor !is AuthenticationIdentity) {
+    if (actor !is Unauthenticated) {
         return NoOpinion
     }
 
