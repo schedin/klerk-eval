@@ -27,6 +27,7 @@ val todoStateMachine = stateMachine {
     event(MoveToTrash) { }
     event(RecoverFromTrash) { }
     event(DeleteFromTrash) { }
+    event(DeleteTodoInternal) { }
 
     voidState {
         onEvent(CreateTodo) {
@@ -41,6 +42,9 @@ val todoStateMachine = stateMachine {
         onEvent(MarkComplete) {
             transitionTo(Completed)
         }
+        onEvent(DeleteTodoInternal) {
+            delete()
+        }
     }
 
     state(Completed) {
@@ -49,6 +53,9 @@ val todoStateMachine = stateMachine {
         }
         onEvent(UnmarkComplete) {
             transitionTo(Created)
+        }
+        onEvent(DeleteTodoInternal) {
+            delete()
         }
     }
 
@@ -60,6 +67,9 @@ val todoStateMachine = stateMachine {
             delete()
         }
         onEvent(DeleteFromTrash) {
+            delete()
+        }
+        onEvent(DeleteTodoInternal) {
             delete()
         }
     }
@@ -84,6 +94,8 @@ object UnmarkComplete : InstanceEventNoParameters<Todo>(Todo::class, true)
 object MoveToTrash : InstanceEventNoParameters<Todo>(Todo::class, true)
 object RecoverFromTrash : InstanceEventNoParameters<Todo>(Todo::class, true)
 object DeleteFromTrash : InstanceEventNoParameters<Todo>(Todo::class, true)
+object DeleteTodoInternal : InstanceEventNoParameters<Todo>(Todo::class, false)
+
 
 fun autoDeleteTodoInTrashTime(args: ArgForInstanceNonEvent<Todo, Ctx, Data>): Instant {
     return args.time.plus(1.days)
