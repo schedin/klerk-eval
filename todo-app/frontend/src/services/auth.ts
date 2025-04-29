@@ -4,9 +4,9 @@ import * as jose from 'jose';
 
 // Define user roles/groups
 export const userGroups: Record<string, string[]> = {
-  'Alice': ['admin', 'user'],
-  'Bob': ['user'],
-  'Charlie': ['guest']
+  'Alice': ['admins', 'users'],
+  'Bob': ['users'],
+  'Charlie': ['guests']
 };
 
 // JWT Secret key - should match the backend
@@ -105,5 +105,5 @@ export const getUserGroups = (): string[] => {
 // Check if the current user is an admin
 export const isAdmin = (): boolean => {
   const groups = getUserGroups();
-  return groups.includes('admin');
+  return groups.includes('admins');
 };

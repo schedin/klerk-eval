@@ -113,8 +113,8 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
                     <span
                       key={index}
                       style={{
-                        backgroundColor: group === 'admin' ? '#ff9800' :
-                                        group === 'user' ? '#4caf50' : '#9e9e9e',
+                        backgroundColor: group === 'admins' ? '#ff9800' :
+                                        group === 'users' ? '#4caf50' : '#9e9e9e',
                         color: 'white',
                         padding: '2px 6px',
                         borderRadius: '10px',

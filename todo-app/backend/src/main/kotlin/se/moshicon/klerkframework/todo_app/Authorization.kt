@@ -9,9 +9,9 @@ import se.moshicon.klerkframework.todo_app.users.User
 import dev.klerkframework.klerk.PositiveAuthorization.*
 import se.moshicon.klerkframework.todo_app.users.DeleteUser
 
-private const val USERS_GROUP = "user"
-private const val ADMINS_GROUP = "admin"
-private const val GUESTS_GROUP = "guest"
+private const val USERS_GROUP = "users"
+private const val ADMINS_GROUP = "admins"
+private const val GUESTS_GROUP = "guests"
 
 fun authorizationRules(): ConfigBuilder.AuthorizationRulesBlock<Ctx, Data>.() -> Unit = {
     commands {
