@@ -7,10 +7,11 @@ import se.moshicon.klerkframework.todo_app.Ctx
 import se.moshicon.klerkframework.todo_app.Data
 import se.moshicon.klerkframework.todo_app.notes.DeleteTodoInternal
 import se.moshicon.klerkframework.todo_app.notes.DeleteTodoInternalParams
-import se.moshicon.klerkframework.todo_app.notes.Todo
+
 
 enum class UserStates {
     Created,
+    SoonToBeDeleted,
 }
 
 val userStateMachine = stateMachine {
@@ -26,6 +27,11 @@ val userStateMachine = stateMachine {
     state(UserStates.Created) {
         onEvent(DeleteUser) {
             createCommands(::deleteAllTodosForUser)
+            transitionTo(UserStates.SoonToBeDeleted)
+        }
+    }
+    state(UserStates.SoonToBeDeleted) {
+        onEnter {
             delete()
         }
     }
