@@ -37,6 +37,8 @@ fun deleteAllTodosForUser(args: ArgForInstanceEvent<User, Nothing?, Ctx, Data>):
     val allUserTodos = args.reader.list(args.reader.data.todos.all) {
         it.props.userID == userId
     }
+//    var allUserTodos = args.reader.getRelated(Todo::class, args.model.id)
+//    println("allUserTodos: ${allUserTodos.size}")
     return allUserTodos.map { todoModel ->
         Command(
             event = DeleteTodoInternal,
