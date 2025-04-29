@@ -57,7 +57,7 @@ data class TodoResponse(
 @Serializable
 data class CreateTodoRequest(val title: String, val description: String)
 
-fun toTodoResponse(todo: Model<Todo>, username: String) = TodoResponse(
+private fun toTodoResponse(todo: Model<Todo>, username: String) = TodoResponse(
     todoID = todo.id.toString(),
     title = todo.props.title.value,
     description = todo.props.description.value,
@@ -69,7 +69,12 @@ fun toTodoResponse(todo: Model<Todo>, username: String) = TodoResponse(
 suspend fun getTodos(call: ApplicationCall, klerk: Klerk<Ctx, Data>) {
     val context = call.context(klerk)
     val todos = klerk.read(context) {
-        listIfAuthorized(data.todos.all).map { todo -> toTodoResponse(todo) }
+        listIfAuthorized(data.todos.all).map {
+            val username = klerk.read(context) {
+                get(it.props.userID).props.name.value
+            }
+            toTodoResponse(it, username)
+        }
     }
     call.respond(todos)
 }
@@ -107,7 +112,7 @@ suspend fun handleTodoCommand(
     call: ApplicationCall,
     klerk: Klerk<Ctx, Data>,
     event: InstanceEventNoParameters<Todo>,
-    onSuccess: suspend (s: Model<Todo>, username: String) -> Unit = { _, _ -> },
+    onSuccess: suspend (pair: Pair<Model<Todo>, String>) -> Unit = { },
 ) {
     val todoID = call.parameters["todoID"] ?: throw IllegalArgumentException("todoID is required")
     val context = call.context(klerk)
@@ -129,20 +134,20 @@ suspend fun handleTodoCommand(
             val user = klerk.read(context) {
                 get(modifiedTodo.props.userID)
             }
-            onSuccess(modifiedTodo, user.props.name.value)
+            onSuccess(modifiedTodo to user.props.name.value)
         }
     }
 }
 
 suspend fun markComplete(call: ApplicationCall, klerk: Klerk<Ctx, Data>) {
-    handleTodoCommand(call, klerk, MarkComplete) {
-        call.respond(HttpStatusCode.Created, toTodoResponse(it))
+    handleTodoCommand(call, klerk, MarkComplete) { (todo, username) ->
+        call.respond(HttpStatusCode.Created, toTodoResponse(todo, username))
     }
 }
 
 suspend fun markUncomplete(call: ApplicationCall, klerk: Klerk<Ctx, Data>) {
-    handleTodoCommand(call, klerk, UnmarkComplete) {
-        call.respond(HttpStatusCode.Created, toTodoResponse(it))
+    handleTodoCommand(call, klerk, UnmarkComplete) { (todo, username) ->
+        call.respond(HttpStatusCode.Created, toTodoResponse(todo, username))
     }
 }
 
@@ -153,13 +158,13 @@ suspend fun delete(call: ApplicationCall, klerk: Klerk<Ctx, Data>) {
 }
 
 suspend fun trash(call: ApplicationCall, klerk: Klerk<Ctx, Data>) {
-    handleTodoCommand(call, klerk, MoveToTrash) {
-        call.respond(HttpStatusCode.OK, toTodoResponse(it))
+    handleTodoCommand(call, klerk, MoveToTrash) { (todo, username) ->
+        call.respond(HttpStatusCode.OK, toTodoResponse(todo, username))
     }
 }
 
 suspend fun unTrash(call: ApplicationCall, klerk: Klerk<Ctx, Data>) {
-    handleTodoCommand(call, klerk, RecoverFromTrash) {
-        call.respond(HttpStatusCode.OK, toTodoResponse(it))
+    handleTodoCommand(call, klerk, RecoverFromTrash) { (todo, username) ->
+        call.respond(HttpStatusCode.OK, toTodoResponse(todo, username))
     }
 }
