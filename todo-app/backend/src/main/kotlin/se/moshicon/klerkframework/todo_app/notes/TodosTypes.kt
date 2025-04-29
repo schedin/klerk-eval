@@ -1,5 +1,6 @@
 package se.moshicon.klerkframework.todo_app.notes
 
+import dev.klerkframework.klerk.ModelID
 import dev.klerkframework.klerk.datatypes.IntContainer
 import dev.klerkframework.klerk.datatypes.StringContainer
 import se.moshicon.klerkframework.todo_app.users.User
@@ -8,7 +9,7 @@ data class Todo(
     val title: TodoTitle,
     val description: TodoDescription,
     val priority: TodoPriority = TodoPriority(0),
-    val user: User,
+    val userID: ModelID<User>,
 )
 
 class TodoPriority(value: Int) : IntContainer(value) {

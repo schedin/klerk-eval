@@ -90,10 +90,12 @@ fun userCanReadOwnUserProps(args: ArgsForPropertyAuth<Ctx, Data>): PositiveAutho
 fun userCanReadOwnTodoProps(args: ArgsForPropertyAuth<Ctx, Data>): PositiveAuthorization {
     val actor = args.context.actor
     val todo = args.model.props
-    if (actor is GroupModelIdentity && todo is Todo && todo.user == actor.model.props) {
-        return Allow
+
+    if (actor !is GroupModelIdentity || todo !is Todo) {
+        return NoOpinion
     }
-    return NoOpinion
+
+    return if (todo.userID == actor.id) Allow else NoOpinion
 }
 
 fun userCanCreateOwnTodos(args: ArgCommandContextReader<*, Ctx, Data>): PositiveAuthorization {
@@ -116,7 +118,7 @@ fun guestsCanOnlyCreateOneTodo(args: ArgCommandContextReader<*, Ctx, Data>): Neg
     if (actor is GroupModelIdentity && actor.groups.contains(GUESTS_GROUP) && !actor.groups.contains(USERS_GROUP)
         && args.command.event is CreateTodo) {
         val numOfTodosForUser = args.reader.list(args.reader.data.todos.all) {
-            actor.model.props.name == it.props.user.name
+            actor.model.id == it.props.userID
         }.size
         return if (numOfTodosForUser < 1) NegativeAuthorization.Pass else NegativeAuthorization.Deny
     }
@@ -133,7 +135,7 @@ fun userCanModifyOwnTodos(args: ArgCommandContextReader<*, Ctx, Data>): Positive
     val todoModel = args.reader.get(commandModelID)
     val todo = todoModel.props
 
-    return if (todo is Todo && todo.user.name == loggedInAsUser) Allow else NoOpinion
+    return if (todo is Todo && todo.userID == actor.model.id) Allow else NoOpinion
 }
 
 fun unAuthenticatedCanReadUsers(args: ArgModelContextReader<Ctx, Data>): PositiveAuthorization {
@@ -180,7 +182,7 @@ fun authenticationIdentityCanReadUsersProps(args: ArgsForPropertyAuth<Ctx, Data>
 fun userCanReadOwnTodos(args: ArgModelContextReader<Ctx, Data>): PositiveAuthorization {
     val actor = args.context.actor
     val todo = args.model.props
-    if (actor is GroupModelIdentity && todo is Todo && todo.user == actor.model.props) {
+    if (actor is GroupModelIdentity && todo is Todo && todo.userID == actor.id) {
         return Allow
     }
     return NoOpinion
