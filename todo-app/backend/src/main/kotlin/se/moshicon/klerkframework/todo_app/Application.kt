@@ -1,11 +1,6 @@
 package se.moshicon.klerkframework.todo_app
 
-import dev.klerkframework.klerk.AuthenticationIdentity
 import dev.klerkframework.klerk.Klerk
-import dev.klerkframework.klerk.SystemIdentity
-import dev.klerkframework.klerk.command.Command
-import dev.klerkframework.klerk.command.CommandToken
-import dev.klerkframework.klerk.command.ProcessingOptions
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
 import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
@@ -23,8 +18,6 @@ fun main() {
     runBlocking {
         klerk.meta.start()
         createInitialUsers(klerk)
-        //deleteUser(klerk,"Bob")
-        //deleteUser(klerk,"Alice")
     }
     embeddedServer(Netty, port = 8080, host = "0.0.0.0", module = {
         // Configure CORS to allow frontend requests

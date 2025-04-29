@@ -2,7 +2,6 @@ package se.moshicon.klerkframework.todo_app.users
 
 import dev.klerkframework.klerk.AuthenticationIdentity
 import dev.klerkframework.klerk.Klerk
-import dev.klerkframework.klerk.SystemIdentity
 import dev.klerkframework.klerk.command.Command
 import dev.klerkframework.klerk.command.CommandToken
 import dev.klerkframework.klerk.command.ProcessingOptions
@@ -28,16 +27,16 @@ suspend fun createInitialUsers(klerk: Klerk<Ctx, Data>) {
     }
 }
 
-suspend fun deleteUser(klerk: Klerk<Ctx, Data>, username: String) {
-    val userToDelete = klerk.read(Ctx(SystemIdentity)) {
-        firstOrNull(data.users.all) { it.props.name.value == username }
-    }
-    if (userToDelete != null) {
-        val command = Command(
-            event = DeleteUser,
-            model = userToDelete.id,
-            params = null,
-        )
-        klerk.handle(command, Ctx(SystemIdentity), ProcessingOptions(CommandToken.simple()))
-    }
-}
+//suspend fun deleteUser(klerk: Klerk<Ctx, Data>, username: String) {
+//    val userToDelete = klerk.read(Ctx(AuthenticationIdentity)) {
+//        firstOrNull(data.users.all) { it.props.name.value == username }
+//    }
+//    if (userToDelete != null) {
+//        val command = Command(
+//            event = DeleteUser,
+//            model = userToDelete.id,
+//            params = null,
+//        )
+//        klerk.handle(command, Ctx(Unauthenticated), ProcessingOptions(CommandToken.simple()))
+//    }
+//}

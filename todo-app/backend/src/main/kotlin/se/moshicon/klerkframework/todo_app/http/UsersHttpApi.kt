@@ -1,10 +1,10 @@
 package se.moshicon.klerkframework.todo_app.http
 
+import dev.klerkframework.klerk.AuthenticationIdentity
 import dev.klerkframework.klerk.CommandResult.Failure
 import dev.klerkframework.klerk.CommandResult.Success
 import dev.klerkframework.klerk.Klerk
 import dev.klerkframework.klerk.Model
-import dev.klerkframework.klerk.SystemIdentity
 import dev.klerkframework.klerk.command.Command
 import dev.klerkframework.klerk.command.CommandToken
 import dev.klerkframework.klerk.command.ProcessingOptions
@@ -44,7 +44,7 @@ suspend fun getUsers(call: ApplicationCall, klerk: Klerk<Ctx, Data>) {
 
 
 suspend fun deleteUser(call: ApplicationCall, klerk: Klerk<Ctx, Data>) {
-    val context = call.context(klerk)
+    val context = Ctx(AuthenticationIdentity)
     val username = call.parameters["username"]
     val userToDelete = klerk.read(context) {
         firstOrNull(data.users.all) {
