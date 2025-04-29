@@ -100,6 +100,17 @@ export const userApi = {
       return [];
     }
   },
+
+  // Delete a user
+  deleteUser: async (username: string): Promise<boolean> => {
+    try {
+      await api.delete(`/users/${username}`);
+      return true;
+    } catch (error) {
+      console.error(`Error deleting user ${username}:`, error);
+      throw error; // Propagate the error to be handled by the caller
+    }
+  },
 };
 
 // API functions for todos

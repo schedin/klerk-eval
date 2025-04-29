@@ -9,6 +9,64 @@ export const userGroups: Record<string, string[]> = {
   'Charlie': ['guests']
 };
 
+// Available groups
+export const availableGroups = ['users', 'admins', 'guests'];
+
+// Add a new user to userGroups
+export const addUser = (username: string, groups: string[] = ['users']): void => {
+  userGroups[username] = groups;
+  // Save to localStorage for persistence
+  saveUserGroupsToStorage();
+};
+
+// Delete a user from userGroups
+export const deleteUser = (username: string): void => {
+  if (userGroups[username]) {
+    delete userGroups[username];
+    // Save to localStorage for persistence
+    saveUserGroupsToStorage();
+  }
+};
+
+// Add a group to a user
+export const addGroupToUser = (username: string, group: string): void => {
+  if (!userGroups[username]) {
+    userGroups[username] = [];
+  }
+
+  if (!userGroups[username].includes(group)) {
+    userGroups[username].push(group);
+    // Save to localStorage for persistence
+    saveUserGroupsToStorage();
+  }
+};
+
+// Remove a group from a user
+export const removeGroupFromUser = (username: string, group: string): void => {
+  if (userGroups[username]) {
+    userGroups[username] = userGroups[username].filter(g => g !== group);
+    // Save to localStorage for persistence
+    saveUserGroupsToStorage();
+  }
+};
+
+// Save userGroups to localStorage
+const saveUserGroupsToStorage = (): void => {
+  localStorage.setItem('userGroups', JSON.stringify(userGroups));
+};
+
+// Load userGroups from localStorage
+export const loadUserGroupsFromStorage = (): void => {
+  const storedGroups = localStorage.getItem('userGroups');
+  if (storedGroups) {
+    const parsedGroups = JSON.parse(storedGroups);
+    // Merge with existing groups
+    Object.keys(parsedGroups).forEach(username => {
+      userGroups[username] = parsedGroups[username];
+    });
+  }
+};
+
 // JWT Secret key - should match the backend
 const JWT_SECRET = "your-secret-key";
 const JWT_ISSUER = "todo-app";
@@ -107,3 +165,10 @@ export const isAdmin = (): boolean => {
   const groups = getUserGroups();
   return groups.includes('admins');
 };
+
+// Initialize by loading from localStorage if available
+try {
+  loadUserGroupsFromStorage();
+} catch (error) {
+  console.error('Error loading user groups from storage:', error);
+}
