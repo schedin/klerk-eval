@@ -69,10 +69,6 @@ fun Application.configureRouting(klerk: Klerk<Ctx, Data>) {
             }
         }
 
-//        route("/custom") {
-//            apply(registerFullControlModeRoutes(klerk))
-//        }
-
         // The auto-generated Admin UI
         val autoAdminUI = LowCodeMain(klerk, lowCodeConfig)
         apply(autoAdminUI.registerRoutes())
