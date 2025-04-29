@@ -31,6 +31,7 @@ fun authorizationRules(): ConfigBuilder.AuthorizationRulesBlock<Ctx, Data>.() ->
             rule(::userCanReadOwnTodos)
             rule(::userCanReadOwnUser)
             rule(::adminGroupCanReadAllTodos)
+            rule(::adminGroupCanReadAllUsers)
         }
         negative {
         }
@@ -42,6 +43,7 @@ fun authorizationRules(): ConfigBuilder.AuthorizationRulesBlock<Ctx, Data>.() ->
             rule(::userCanReadOwnUserProps)
             rule(::unAuthenticatedCanReadUsersProps)
             rule(::adminGroupCanReadAllTodoProps)
+            rule(::adminGroupCanReadAllUserProps)
         }
         negative {
         }
@@ -163,6 +165,14 @@ fun adminGroupCanReadAllTodoProps(args: ArgsForPropertyAuth<Ctx, Data>): Positiv
     return NoOpinion
 }
 
+fun adminGroupCanReadAllUserProps(args: ArgsForPropertyAuth<Ctx, Data>): PositiveAuthorization {
+    val actor = args.context.actor
+    if (actor is GroupModelIdentity && actor.groups.contains(ADMINS_GROUP) && args.model.props is User) {
+        return Allow
+    }
+    return NoOpinion
+}
+
 fun authenticationIdentityCanReadUsers(args: ArgModelContextReader<Ctx, Data>): PositiveAuthorization {
     if (args.context.actor == AuthenticationIdentity && args.model.props is User) {
         return Allow
@@ -201,6 +211,14 @@ fun adminGroupCanReadAllTodos(args: ArgModelContextReader<Ctx, Data>): PositiveA
     val actor = args.context.actor
     val todo = args.model.props
     if (actor is GroupModelIdentity && todo is Todo && actor.groups.contains(ADMINS_GROUP)) {
+        return Allow
+    }
+    return NoOpinion
+}
+
+fun adminGroupCanReadAllUsers(args: ArgModelContextReader<Ctx, Data>): PositiveAuthorization {
+    val actor = args.context.actor
+    if (actor is GroupModelIdentity && args.model.props is User && actor.groups.contains(ADMINS_GROUP)) {
         return Allow
     }
     return NoOpinion
