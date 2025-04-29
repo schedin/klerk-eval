@@ -57,7 +57,7 @@ fun Application.configureHttpRouting(klerk: Klerk<Ctx, Data>) {
     routing {
         route("/api") {
             // No authentication for user management because the browser simulates the Identity Provider (IdP).
-            // In a real app this URL should be protected and a real IdP should be used.
+            // In a real app this URL should be protected, and a real IdP should be used.
             route("/users") {
                 apply(registerUsersRoutes(klerk))
             }

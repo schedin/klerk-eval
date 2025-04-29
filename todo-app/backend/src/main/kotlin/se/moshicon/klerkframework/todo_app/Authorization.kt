@@ -18,7 +18,7 @@ fun authorizationRules(): ConfigBuilder.AuthorizationRulesBlock<Ctx, Data>.() ->
         positive {
             rule(::userCanCreateOwnTodos)
             rule(::userCanModifyOwnTodos)
-            rule(::systemIdentityCanDeleteUsers)
+            rule(::authenticationIdentityCanDeleteUsers)
         }
         negative {
             rule(::guestsCanOnlyCreateOneTodo)
@@ -54,9 +54,13 @@ fun authorizationRules(): ConfigBuilder.AuthorizationRulesBlock<Ctx, Data>.() ->
     }
 }
 
-fun systemIdentityCanDeleteUsers(args: ArgCommandContextReader<*, Ctx, Data>): PositiveAuthorization {
+/**
+ * Normally the AuthenticationIdentity would not be able to modify users. But since the browser is simulating the IdP,
+ * we allow it.
+ */
+fun authenticationIdentityCanDeleteUsers(args: ArgCommandContextReader<*, Ctx, Data>): PositiveAuthorization {
     val actor = args.context.actor
-    if (actor is SystemIdentity &&
+    if (actor is AuthenticationIdentity &&
         args.command.event is DeleteUser
     ) {
         return Allow
