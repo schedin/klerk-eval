@@ -7,6 +7,7 @@ import se.moshicon.klerkframework.todo_app.notes.Todo
 import se.moshicon.klerkframework.todo_app.users.GroupModelIdentity
 import se.moshicon.klerkframework.todo_app.users.User
 import dev.klerkframework.klerk.PositiveAuthorization.*
+import se.moshicon.klerkframework.todo_app.users.CreateUser
 import se.moshicon.klerkframework.todo_app.users.DeleteUser
 
 private const val USERS_GROUP = "users"
@@ -18,7 +19,7 @@ fun authorizationRules(): ConfigBuilder.AuthorizationRulesBlock<Ctx, Data>.() ->
         positive {
             rule(::userCanCreateOwnTodos)
             rule(::userCanModifyOwnTodos)
-            rule(::authenticationIdentityCanDeleteUsers)
+            rule(::authenticationIdentityCanModifyUsers)
         }
         negative {
             rule(::guestsCanOnlyCreateOneTodo)
@@ -58,14 +59,20 @@ fun authorizationRules(): ConfigBuilder.AuthorizationRulesBlock<Ctx, Data>.() ->
  * Normally the AuthenticationIdentity would not be able to modify users. But since the browser is simulating the IdP,
  * we allow it.
  */
-fun authenticationIdentityCanDeleteUsers(args: ArgCommandContextReader<*, Ctx, Data>): PositiveAuthorization {
+fun authenticationIdentityCanModifyUsers(args: ArgCommandContextReader<*, Ctx, Data>): PositiveAuthorization {
     val actor = args.context.actor
-    if (actor is AuthenticationIdentity &&
-        args.command.event is DeleteUser
-    ) {
+    if (actor !is AuthenticationIdentity) {
+        return NoOpinion
+    }
+
+    if (args.command.event == CreateUser) {
         return Allow
     }
-    return NoOpinion
+
+    val commandModelID = args.command.model ?: return NoOpinion
+    val model = args.reader.get(commandModelID)
+    val domainModel = model.props
+    return if (domainModel is User) Allow else NoOpinion
 }
 
 fun allCanReadEventLog(@Suppress("UNUSED_PARAMETER") args: ArgContextReader<Ctx, Data>): PositiveAuthorization {
@@ -181,7 +188,7 @@ fun userCanReadOwnTodos(args: ArgModelContextReader<Ctx, Data>): PositiveAuthori
 fun adminGroupCanReadAllTodos(args: ArgModelContextReader<Ctx, Data>): PositiveAuthorization {
     val actor = args.context.actor
     val todo = args.model.props
-    if (actor is GroupModelIdentity && todo is Todo && actor.groups.contains("admin")) {
+    if (actor is GroupModelIdentity && todo is Todo && actor.groups.contains(ADMINS_GROUP)) {
         return Allow
     }
     return NoOpinion
