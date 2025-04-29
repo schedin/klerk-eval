@@ -100,6 +100,7 @@ fun userCanCreateOwnTodos(args: ArgCommandContextReader<*, Ctx, Data>): Positive
     val actor = args.context.actor
     val createParams = args.command.params
     if (actor is GroupModelIdentity &&
+        (actor.groups.contains(USERS_GROUP) || actor.groups.contains(GUESTS_GROUP)) &&
         args.command.event is CreateTodo &&
         createParams is CreateTodoParams &&
         createParams.user == actor.model.props
