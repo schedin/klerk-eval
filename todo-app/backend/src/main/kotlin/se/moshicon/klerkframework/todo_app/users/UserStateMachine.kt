@@ -32,29 +32,20 @@ val userStateMachine = stateMachine {
 }
 
 
-
-//ArgForInstanceEvent<User, Nothing?, Ctx, Data>
 fun deleteAllTodosForUser(args: ArgForInstanceEvent<User, Nothing?, Ctx, Data>): List<Command<out Any, out Any>> {
     val userId = args.model.id
     val allUserTodos = args.reader.list(args.reader.data.todos.all) {
         it.props.userID == userId
     }
-
-    allUserTodos.forEach {
-        println(it)
-    }
-
     return allUserTodos.map { todoModel ->
         Command(
             event = DeleteTodoInternal,
             model = todoModel.id,
             params = DeleteTodoInternalParams(),
+//            params = null,
         )
     }
-//    return emptyList()
 }
-
-
 
 object CreateUser : VoidEventWithParameters<User, CreateUserParams>(User::class, true, CreateUserParams::class)
 object DeleteUser : InstanceEventNoParameters<User>(User::class, true)
