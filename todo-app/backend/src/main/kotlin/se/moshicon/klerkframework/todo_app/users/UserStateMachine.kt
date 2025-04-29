@@ -21,10 +21,14 @@ val userStateMachine = stateMachine {
 
     state(UserStates.Created) {
         onEvent(DeleteUser) {
-            //TODO: Also delete all todos created by this user
+            deleteAllTodosForUser()
             delete()
         }
     }
+}
+
+fun deleteAllTodosForUser() {
+    TODO("Not yet implemented")
 }
 
 object CreateUser : VoidEventWithParameters<User, CreateUserParams>(User::class, true, CreateUserParams::class)
