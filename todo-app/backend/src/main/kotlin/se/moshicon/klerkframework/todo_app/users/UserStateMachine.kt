@@ -30,20 +30,18 @@ val userStateMachine = stateMachine {
 }
 
 fun deleteAllTodosForUser(args: ArgForInstanceEvent<User, Nothing?, Ctx, Data>): List<Command<out Any, out Any>>  {
-    val commands = ArrayList<Command<out Any, out Any>>()
+    val commands = mutableListOf<Command<out Any, out Any>>()
 
-    args.reader.apply {
-        val userId = args.model.id
-        val allUserTodos = list(args.reader.data.todos.all) {
-            it.props.userID == userId
-        }
-        allUserTodos.forEach { todo ->
-            commands.add(Command(
-                event = DeleteTodoInternal,
-                model = todo.id,
-                params = null
-            ))
-        }
+    val userId = args.model.id
+    val allUserTodos = args.reader.data.todos.all.filter {
+        it.props.userID == userId
+    }
+    allUserTodos.forEach { todo ->
+        commands.add(Command(
+            event = DeleteTodoInternal,
+            model = todo.id,
+            params = null
+        ))
     }
 
     return commands
