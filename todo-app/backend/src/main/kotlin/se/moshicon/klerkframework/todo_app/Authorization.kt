@@ -7,6 +7,7 @@ import se.moshicon.klerkframework.todo_app.notes.Todo
 import se.moshicon.klerkframework.todo_app.users.GroupModelIdentity
 import se.moshicon.klerkframework.todo_app.users.User
 import dev.klerkframework.klerk.PositiveAuthorization.*
+import se.moshicon.klerkframework.todo_app.notes.DeleteTodoInternal
 import se.moshicon.klerkframework.todo_app.users.CreateUser
 
 private const val USERS_GROUP = "users"
@@ -19,6 +20,7 @@ fun authorizationRules(): ConfigBuilder.AuthorizationRulesBlock<Ctx, Data>.() ->
             rule(::userCanCreateOwnTodos)
             rule(::userCanModifyOwnTodos)
             rule(::authenticationIdentityCanModifyUsers)
+            rule(::authenticationIdentityCanDeleteTodos)
         }
         negative {
             rule(::guestsCanOnlyCreateOneTodo)
@@ -139,6 +141,16 @@ fun userCanModifyOwnTodos(args: ArgCommandContextReader<*, Ctx, Data>): Positive
 
     return if (todo is Todo && todo.userID == actor.model.id) Allow else NoOpinion
 }
+
+
+fun authenticationIdentityCanDeleteTodos(args: ArgCommandContextReader<*, Ctx, Data>): PositiveAuthorization {
+    val commandModelID = args.command.model
+    if (commandModelID != null && args.context.actor == AuthenticationIdentity && args.command.event == DeleteTodoInternal) {
+        return Allow
+    }
+    return NoOpinion
+}
+
 
 fun unAuthenticatedCanReadUsers(args: ArgModelContextReader<Ctx, Data>): PositiveAuthorization {
     if (args.context.actor == Unauthenticated && args.model.props is User) {
