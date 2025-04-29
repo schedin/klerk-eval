@@ -26,7 +26,7 @@ private const val JWT_SECRET = "your-secret-key"
 private const val JWT_ISSUER = "todo-app"
 private const val JWT_AUDIENCE = "todo-app-users"
 
-fun Application.configureRouting(klerk: Klerk<Ctx, Data>) {
+fun Application.configureHttpRouting(klerk: Klerk<Ctx, Data>) {
     // Configure JWT authentication
     install(Authentication) {
         jwt("auth-jwt") {
@@ -56,7 +56,8 @@ fun Application.configureRouting(klerk: Klerk<Ctx, Data>) {
 
     routing {
         route("/api") {
-            // Public routes (no authentication required)
+            // No authentication for user management because the browser simulates the Identity Provider (IdP).
+            // In a real app this URL should be protected and a real IdP should be used.
             route("/users") {
                 apply(registerUsersRoutes(klerk))
             }

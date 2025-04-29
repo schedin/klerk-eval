@@ -1,14 +1,12 @@
 package se.moshicon.klerkframework.todo_app.users
 
 import dev.klerkframework.klerk.*
-import dev.klerkframework.klerk.statemachine.StateMachine
 import dev.klerkframework.klerk.statemachine.stateMachine
 import se.moshicon.klerkframework.todo_app.Ctx
 import se.moshicon.klerkframework.todo_app.Data
 
 enum class UserStates {
     Created,
-    ToBeDeleted,
 }
 
 val userStateMachine = stateMachine {

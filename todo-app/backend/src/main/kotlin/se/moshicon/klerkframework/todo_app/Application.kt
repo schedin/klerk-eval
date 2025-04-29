@@ -2,6 +2,7 @@ package se.moshicon.klerkframework.todo_app
 
 import dev.klerkframework.klerk.AuthenticationIdentity
 import dev.klerkframework.klerk.Klerk
+import dev.klerkframework.klerk.SystemIdentity
 import dev.klerkframework.klerk.command.Command
 import dev.klerkframework.klerk.command.CommandToken
 import dev.klerkframework.klerk.command.ProcessingOptions
@@ -14,9 +15,10 @@ import io.ktor.server.application.*
 import io.ktor.http.*
 
 import kotlinx.coroutines.runBlocking
-import se.moshicon.klerkframework.todo_app.http.configureRouting
+import se.moshicon.klerkframework.todo_app.http.configureHttpRouting
 import se.moshicon.klerkframework.todo_app.users.CreateUser
 import se.moshicon.klerkframework.todo_app.users.CreateUserParams
+import se.moshicon.klerkframework.todo_app.users.DeleteUser
 import se.moshicon.klerkframework.todo_app.users.UserName
 
 fun main() {
@@ -24,6 +26,8 @@ fun main() {
     runBlocking {
         klerk.meta.start()
         createInitialUsers(klerk)
+        //deleteUser(klerk,"Bob")
+        //deleteUser(klerk,"Alice")
     }
     embeddedServer(Netty, port = 8080, host = "0.0.0.0", module = {
         // Configure CORS to allow frontend requests
@@ -46,10 +50,8 @@ fun main() {
             json()
         }
 
-        // Configure routing with JWT authentication
-        configureRouting(klerk)
+        configureHttpRouting(klerk)
     }).start(wait = true)
-    //Thread.sleep(10.minutes.inWholeMilliseconds)
 }
 
 suspend fun createInitialUsers(klerk: Klerk<Ctx, Data>) {
@@ -68,5 +70,19 @@ suspend fun createInitialUsers(klerk: Klerk<Ctx, Data>) {
         createUser("Alice")
         createUser("Bob")
         createUser("Charlie")
+    }
+}
+
+suspend fun deleteUser(klerk: Klerk<Ctx, Data>, username: String) {
+    val userToDelete = klerk.read(Ctx(SystemIdentity)) {
+        firstOrNull(data.users.all) { it.props.name.value == username }
+    }
+    if (userToDelete != null) {
+        val command = Command(
+            event = DeleteUser,
+            model = userToDelete.id,
+            params = null,
+        )
+        klerk.handle(command, Ctx(SystemIdentity), ProcessingOptions(CommandToken.simple()))
     }
 }

@@ -7,6 +7,7 @@ import se.moshicon.klerkframework.todo_app.notes.Todo
 import se.moshicon.klerkframework.todo_app.users.GroupModelIdentity
 import se.moshicon.klerkframework.todo_app.users.User
 import dev.klerkframework.klerk.PositiveAuthorization.*
+import se.moshicon.klerkframework.todo_app.users.DeleteUser
 
 private const val USERS_GROUP = "user"
 private const val ADMINS_GROUP = "admin"
@@ -17,6 +18,7 @@ fun authorizationRules(): ConfigBuilder.AuthorizationRulesBlock<Ctx, Data>.() ->
         positive {
             rule(::userCanCreateOwnTodos)
             rule(::userCanModifyOwnTodos)
+            rule(::systemIdentityCanDeleteUsers)
         }
         negative {
             rule(::guestsCanOnlyCreateOneTodo)
@@ -50,6 +52,16 @@ fun authorizationRules(): ConfigBuilder.AuthorizationRulesBlock<Ctx, Data>.() ->
         negative {
         }
     }
+}
+
+fun systemIdentityCanDeleteUsers(args: ArgCommandContextReader<*, Ctx, Data>): PositiveAuthorization {
+    val actor = args.context.actor
+    if (actor is SystemIdentity &&
+        args.command.event is DeleteUser
+    ) {
+        return Allow
+    }
+    return NoOpinion
 }
 
 fun allCanReadEventLog(@Suppress("UNUSED_PARAMETER") args: ArgContextReader<Ctx, Data>): PositiveAuthorization {
