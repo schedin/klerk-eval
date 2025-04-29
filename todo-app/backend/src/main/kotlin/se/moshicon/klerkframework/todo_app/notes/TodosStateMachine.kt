@@ -1,9 +1,6 @@
 package se.moshicon.klerkframework.todo_app.notes
 
-import dev.klerkframework.klerk.ArgForInstanceNonEvent
-import dev.klerkframework.klerk.ArgForVoidEvent
-import dev.klerkframework.klerk.InstanceEventNoParameters
-import dev.klerkframework.klerk.VoidEventWithParameters
+import dev.klerkframework.klerk.*
 import dev.klerkframework.klerk.statemachine.stateMachine
 import kotlinx.datetime.Instant
 import se.moshicon.klerkframework.todo_app.Ctx
@@ -94,7 +91,9 @@ object UnmarkComplete : InstanceEventNoParameters<Todo>(Todo::class, true)
 object MoveToTrash : InstanceEventNoParameters<Todo>(Todo::class, true)
 object RecoverFromTrash : InstanceEventNoParameters<Todo>(Todo::class, true)
 object DeleteFromTrash : InstanceEventNoParameters<Todo>(Todo::class, true)
-object DeleteTodoInternal : InstanceEventNoParameters<Todo>(Todo::class, false)
+object DeleteTodoInternal : InstanceEventWithParameters<Todo, DeleteTodoInternalParams>(Todo::class, false, DeleteTodoInternalParams::class)
+class DeleteTodoInternalParams
+//object DeleteTodoInternal : InstanceEventNoParameters<Todo>(Todo::class, false)
 
 
 fun autoDeleteTodoInTrashTime(args: ArgForInstanceNonEvent<Todo, Ctx, Data>): Instant {
