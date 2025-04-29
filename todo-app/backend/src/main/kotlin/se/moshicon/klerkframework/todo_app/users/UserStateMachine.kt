@@ -6,6 +6,7 @@ import dev.klerkframework.klerk.statemachine.stateMachine
 import se.moshicon.klerkframework.todo_app.Ctx
 import se.moshicon.klerkframework.todo_app.Data
 import se.moshicon.klerkframework.todo_app.notes.DeleteTodoInternal
+import se.moshicon.klerkframework.todo_app.notes.Todo
 
 enum class UserStates {
     Created,
@@ -30,22 +31,19 @@ val userStateMachine = stateMachine {
 }
 
 fun deleteAllTodosForUser(args: ArgForInstanceEvent<User, Nothing?, Ctx, Data>): List<Command<out Any, out Any>>  {
-    val commands = mutableListOf<Command<out Any, out Any>>()
-
     val userId = args.model.id
-    val allUserTodos = args.reader.data.todos.all.filter {
+    val allUserTodos = args.reader.list(args.reader.data.todos.all) {
         it.props.userID == userId
     }
-    allUserTodos.forEach { todo ->
-        commands.add(Command(
+    return allUserTodos.map { todoModel: Model<Todo> ->
+        Command(
             event = DeleteTodoInternal,
-            model = todo.id,
+            model = todoModel.id,
             params = null
-        ))
+        )
     }
-
-    return commands
 }
+
 
 
 object CreateUser : VoidEventWithParameters<User, CreateUserParams>(User::class, true, CreateUserParams::class)
