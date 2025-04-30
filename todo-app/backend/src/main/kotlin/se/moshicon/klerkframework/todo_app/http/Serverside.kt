@@ -52,12 +52,30 @@ fun registerServersideRoutes(klerk: Klerk<Ctx, Data>): Route.() -> Unit = {
 }
 
 suspend fun handleCreateTodo(call: ApplicationCall, klerk: Klerk<Ctx, Data>) {
+    val context = call.context(klerk)
+
     when (val result = FormTemplates.createTodoTemplate.parse(call)) {
         is ParseResult.Invalid -> EventFormTemplate.respondInvalid(result, call)
-        is ParseResult.DryRun -> println("TODO: describe what to do here")
+        is ParseResult.DryRun -> {
+            println("ParseResult.DryRun")
+            val command = Command(
+                event = CreateTodo,
+                model = null,
+                params = result.params
+            )
+            when(val commandResult = klerk.handle(command, context, ProcessingOptions(result.key, dryRun = true))) {
+                is CommandResult.Failure -> {
+                    call.respond(HttpStatusCode.fromValue(commandResult.problem.recommendedHttpCode),
+                        commandResult.problem.violatedRule.toString())
+                }
+                is CommandResult.Success -> {
+                    call.respond(HttpStatusCode.OK)
+                }
+            }
+        }
         is ParseResult.Parsed -> {
             println("ParseResult.Parsed")
-            val context = call.context(klerk)
+
             val command = Command(
                 event = CreateTodo,
                 model = null,
@@ -68,9 +86,6 @@ suspend fun handleCreateTodo(call: ApplicationCall, klerk: Klerk<Ctx, Data>) {
                     call.respond(HttpStatusCode.BadRequest, commandResult.problem.toString())
                 }
                 is CommandResult.Success -> {
-                    val createdTodo = klerk.read(context) {
-                        get(commandResult.primaryModel!!)
-                    }
                     call.respondRedirect("")
                 }
             }
