@@ -29,13 +29,13 @@ object FormTemplates {
         ) {
             text(CreateTodoParams::title)
             text(CreateTodoParams::description)
+            populatedAfterSubmit(CreateTodoParams::user)
         }
     }
 }
 
 fun registerServersideRoutes(klerk: Klerk<Ctx, Data>): Route.() -> Unit = {
     FormTemplates.init(klerk)
-
     get("/{...}") { indexPage(call, klerk) }
 }
 

@@ -94,7 +94,6 @@ object RecoverFromTrash : InstanceEventNoParameters<Todo>(Todo::class, true)
 object DeleteFromTrash : InstanceEventNoParameters<Todo>(Todo::class, true)
 object DeleteTodoInternal : InstanceEventWithParameters<Todo, DeleteTodoInternalParams>(Todo::class, false, DeleteTodoInternalParams::class)
 class DeleteTodoInternalParams // Dummy params workaround because Kotlin generics type system with respect to nullability
-//object DeleteTodoInternal : InstanceEventNoParameters<Todo>(Todo::class, false)
 
 
 fun autoDeleteTodoInTrashTime(args: ArgForInstanceNonEvent<Todo, Ctx, Data>): Instant {

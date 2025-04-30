@@ -17,7 +17,11 @@ class Ctx(
     override val auditExtra: String? = null,
     override val time: Instant = Clock.System.now(),
     override val translator: Translator = DefaultTranslator(),
-) : KlerkContext
+) : KlerkContext {
+//    fun getUserID() : ModelID<User> {
+//
+//    }
+}
 
 fun createConfig() = ConfigBuilder<Ctx, Data>(Data).build {
     authorization {
