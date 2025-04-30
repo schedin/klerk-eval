@@ -10,7 +10,7 @@ val jwt_version: String by project
 plugins {
     kotlin("jvm") version "2.1.10"
     id("io.ktor.plugin") version "2.3.10"
-    id("org.jetbrains.kotlin.plugin.serialization") version "1.6.10"
+    kotlin("plugin.serialization") version "2.1.10"
     id("com.expediagroup.graphql") version "7.1.1"
 }
 
