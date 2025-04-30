@@ -71,7 +71,7 @@ suspend fun handleCreateTodo(call: ApplicationCall, klerk: Klerk<Ctx, Data>) {
                     val createdTodo = klerk.read(context) {
                         get(commandResult.primaryModel!!)
                     }
-                    call.respondRedirect("/")
+                    call.respondRedirect("")
                 }
             }
         }
