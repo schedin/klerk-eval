@@ -16,11 +16,9 @@ import io.ktor.server.routing.*
 import kotlinx.html.body
 import se.moshicon.klerkframework.todo_app.Ctx
 import se.moshicon.klerkframework.todo_app.Data
-import se.moshicon.klerkframework.todo_app.notes.CreateTodo
-import se.moshicon.klerkframework.todo_app.notes.CreateTodoParams
-import se.moshicon.klerkframework.todo_app.notes.TodoDescription
-import se.moshicon.klerkframework.todo_app.notes.TodoTitle
+import se.moshicon.klerkframework.todo_app.notes.*
 import se.moshicon.klerkframework.todo_app.users.UserName
+import kotlin.reflect.KProperty1
 
 
 object FormTemplates {
@@ -37,8 +35,8 @@ object FormTemplates {
         ) {
             text(CreateTodoParams::title)
             text(CreateTodoParams::description)
-//            populatedAfterSubmit(CreateTodoParams::username)
-            text(CreateTodoParams::username)
+            populatedAfterSubmit(CreateTodoParams::username)
+            //text(CreateTodoParams::username)
         }
     }
 }
@@ -53,7 +51,10 @@ fun registerServersideRoutes(klerk: Klerk<Ctx, Data>): Route.() -> Unit = {
 
 suspend fun handleCreateTodo(call: ApplicationCall, klerk: Klerk<Ctx, Data>) {
     val context = call.context(klerk)
-    when (val result = FormTemplates.createTodoTemplate.parse(call)) {
+
+    val populatedAfterSubmit: Map<KProperty1<*, Any?>, UserName> =
+        mapOf(CreateTodoParams::username to UserName("Alice"))
+    when (val result = FormTemplates.createTodoTemplate.parse(call, populatedAfterSubmit)) {
         is ParseResult.Invalid -> EventFormTemplate.respondInvalid(result, call)
         is ParseResult.DryRun -> {
             println("ParseResult.DryRun")
@@ -64,7 +65,7 @@ suspend fun handleCreateTodo(call: ApplicationCall, klerk: Klerk<Ctx, Data>) {
             )
             when(val commandResult = klerk.handle(command, context, ProcessingOptions(result.key, dryRun = true))) {
                 is CommandResult.Failure -> {
-                    val problemJson = """ {"problems": [{"humanReadable": "${commandResult.problem.toString()}"}], "fieldsMustBeNull": [], "fieldsMustNotBeNull": []} """
+                    val problemJson = toClientJavaScriptProblemJson(commandResult.problem.toString())
                     println(problemJson)
                     call.respond(HttpStatusCode.fromValue(commandResult.problem.recommendedHttpCode),
                         problemJson)
@@ -92,6 +93,14 @@ suspend fun handleCreateTodo(call: ApplicationCall, klerk: Klerk<Ctx, Data>) {
             }
         }
     }
+}
+
+/**
+ * Converts an error message string into a JSON object that is parsable for the klerk-web Javascript code. Replace
+ * this function when klerk-web adds a built-in function to do this.
+ */
+private fun toClientJavaScriptProblemJson(errorString: String): String {
+    return """ {"problems": [{"humanReadable": "${errorString}"}], "fieldsMustBeNull": [], "fieldsMustNotBeNull": []} """
 }
 
 suspend fun indexPage(call: ApplicationCall, klerk: Klerk<Ctx, Data>) {

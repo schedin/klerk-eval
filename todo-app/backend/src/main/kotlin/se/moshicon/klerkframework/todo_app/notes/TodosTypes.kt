@@ -1,5 +1,6 @@
 package se.moshicon.klerkframework.todo_app.notes
 
+import dev.klerkframework.klerk.InvalidParametersProblem
 import dev.klerkframework.klerk.ModelID
 import dev.klerkframework.klerk.datatypes.IntContainer
 import dev.klerkframework.klerk.datatypes.StringContainer
@@ -15,7 +16,12 @@ data class Todo(
 class TodoPriority(value: Int) : IntContainer(value) {
     override val min = 0
     override val max = 10
+//    override val validators = setOf<() -> InvalidParametersProblem?>( ::checkMe )
 }
+
+//fun checkMe(): InvalidParametersProblem? {
+//    return null
+//}
 
 class TodoTitle(value: String) : StringContainer(value) {
     override val minLength = 0
