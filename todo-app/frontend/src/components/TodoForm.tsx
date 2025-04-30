@@ -16,6 +16,10 @@ const TodoForm: React.FC<TodoFormProps> = ({ onSubmit }) => {
   const isNearLimit = remainingChars <= 20;
   const isAtLimit = remainingChars <= 0;
 
+  // Calculate remaining characters for the description
+  const maxDescriptionLength = 1000; // Set a reasonable limit
+  const remainingDescChars = maxDescriptionLength - description.length;
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const success = await onSubmit({ title, description, priority });
@@ -29,7 +33,7 @@ const TodoForm: React.FC<TodoFormProps> = ({ onSubmit }) => {
 
   return (
     <form onSubmit={handleSubmit} style={{ marginBottom: '20px' }}>
-      <div style={{ marginBottom: '10px' }}>
+      <div style={{ marginBottom: '20px' }}>
         <div style={{ position: 'relative' }}>
           <input
             type="text"
@@ -49,10 +53,14 @@ const TodoForm: React.FC<TodoFormProps> = ({ onSubmit }) => {
             style={{
               position: 'absolute',
               right: '8px',
-              bottom: '-20px',
+              top: '8px',
               fontSize: '12px',
               color: isAtLimit ? '#f44336' : isNearLimit ? '#ff9800' : '#666',
-              fontWeight: isNearLimit ? 'bold' : 'normal'
+              fontWeight: isNearLimit ? 'bold' : 'normal',
+              backgroundColor: 'rgba(255, 255, 255, 0.8)',
+              padding: '2px 6px',
+              borderRadius: '3px',
+              zIndex: 10
             }}
           >
             {remainingChars} characters remaining
@@ -60,18 +68,35 @@ const TodoForm: React.FC<TodoFormProps> = ({ onSubmit }) => {
         </div>
       </div>
       <div style={{ marginBottom: '10px' }}>
-        <textarea
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-          placeholder="Description"
-          style={{
-            width: '100%',
-            padding: '8px',
-            borderRadius: '4px',
-            border: '1px solid #ccc',
-            minHeight: '100px'
-          }}
-        />
+        <div style={{ position: 'relative' }}>
+          <textarea
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            placeholder="Description"
+            maxLength={maxDescriptionLength}
+            style={{
+              width: '100%',
+              padding: '8px',
+              borderRadius: '4px',
+              border: '1px solid #ccc',
+              minHeight: '100px'
+            }}
+          />
+          <div
+            style={{
+              position: 'absolute',
+              right: '8px',
+              bottom: '8px',
+              fontSize: '12px',
+              color: '#666',
+              backgroundColor: 'rgba(255, 255, 255, 0.8)',
+              padding: '2px 6px',
+              borderRadius: '3px'
+            }}
+          >
+            {remainingDescChars} characters remaining
+          </div>
+        </div>
       </div>
       <div style={{ marginBottom: '15px' }}>
         <label htmlFor="priority" style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
