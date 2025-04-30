@@ -64,8 +64,10 @@ suspend fun handleCreateTodo(call: ApplicationCall, klerk: Klerk<Ctx, Data>) {
             )
             when(val commandResult = klerk.handle(command, context, ProcessingOptions(result.key, dryRun = true))) {
                 is CommandResult.Failure -> {
+                    val problemJson = """ {"problems": [{"humanReadable": "${commandResult.problem.toString()}"}], "fieldsMustBeNull": [], "fieldsMustNotBeNull": []} """
+                    println(problemJson)
                     call.respond(HttpStatusCode.fromValue(commandResult.problem.recommendedHttpCode),
-                        commandResult.problem.violatedRule.toString())
+                        problemJson)
                 }
                 is CommandResult.Success -> {
                     call.respond(HttpStatusCode.OK)
