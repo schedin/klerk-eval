@@ -6,7 +6,6 @@ import dev.klerkframework.klerk.misc.EventParameters
 import dev.klerkframework.web.EventFormTemplate
 import io.ktor.server.application.*
 import io.ktor.server.html.*
-import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import kotlinx.html.body
 import se.moshicon.klerkframework.todo_app.Ctx
@@ -29,7 +28,8 @@ object FormTemplates {
         ) {
             text(CreateTodoParams::title)
             text(CreateTodoParams::description)
-            populatedAfterSubmit(CreateTodoParams::user)
+//            populatedAfterSubmit(CreateTodoParams::username)
+            text(CreateTodoParams::username)
         }
     }
 }

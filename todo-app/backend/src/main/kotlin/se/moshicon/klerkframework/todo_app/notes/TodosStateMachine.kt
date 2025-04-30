@@ -9,6 +9,7 @@ import se.moshicon.klerkframework.todo_app.Data
 import se.moshicon.klerkframework.todo_app.notes.TodoStates.*
 import se.moshicon.klerkframework.todo_app.users.GroupModelIdentity
 import se.moshicon.klerkframework.todo_app.users.User
+import se.moshicon.klerkframework.todo_app.users.UserName
 import kotlin.time.Duration.Companion.days
 
 
@@ -74,7 +75,7 @@ val todoStateMachine = stateMachine {
 }
 
 object CreateTodo : VoidEventWithParameters<Todo, CreateTodoParams>(Todo::class, true, CreateTodoParams::class)
-class CreateTodoParams(val title: TodoTitle, val description: TodoDescription, val user: User)
+class CreateTodoParams(val title: TodoTitle, val description: TodoDescription, val username: UserName)
 fun createTodo(args: ArgForVoidEvent<Todo, CreateTodoParams, Ctx, Data>): Todo {
     val actor = args.context.actor
     if (actor !is GroupModelIdentity) {
