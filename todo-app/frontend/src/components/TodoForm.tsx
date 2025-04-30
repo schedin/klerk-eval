@@ -107,7 +107,7 @@ const TodoForm: React.FC<TodoFormProps> = ({ onSubmit }) => {
           value={priority}
           onChange={(e) => setPriority(Number(e.target.value))}
           style={{
-            width: '100%',
+            width: '250px',
             padding: '8px',
             borderRadius: '4px',
             border: '1px solid #ccc'
