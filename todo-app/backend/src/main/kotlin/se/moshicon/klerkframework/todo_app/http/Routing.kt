@@ -105,8 +105,28 @@ suspend fun ApplicationCall.context(klerk: Klerk<Ctx, Data>): Ctx {
             println("Error parsing JWT: ${e.message}")
             Ctx(Unauthenticated)
         }
+    } else if (request.cookies["user_info"] != null) {
+        // Extract username and groups from cookie (not sure, don't use in production)
+        val cookieValue = request.cookies["user_info"]!!
+        val parts = cookieValue.split(":")
+
+        if (parts.isNotEmpty()) {
+            val username = parts[0]
+            // Extract groups if present, otherwise empty list
+            val groups = if (parts.size > 1 && parts[1].isNotEmpty()) {
+                parts[1].split(",")
+            } else {
+                listOf()
+            }
+
+            val user = findOrCreateUser(klerk, username)
+            return Ctx(GroupModelIdentity(model = user, groups = groups))
+        } else {
+            // Invalid cookie format, use unauthenticated identity
+            Ctx(Unauthenticated)
+        }
     } else {
-        // No JWT token, use unauthenticated identity
+        // Fallback to unauthenticated identity
         Ctx(Unauthenticated)
     }
 }
