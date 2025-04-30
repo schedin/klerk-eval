@@ -53,7 +53,6 @@ fun registerServersideRoutes(klerk: Klerk<Ctx, Data>): Route.() -> Unit = {
 
 suspend fun handleCreateTodo(call: ApplicationCall, klerk: Klerk<Ctx, Data>) {
     val context = call.context(klerk)
-
     when (val result = FormTemplates.createTodoTemplate.parse(call)) {
         is ParseResult.Invalid -> EventFormTemplate.respondInvalid(result, call)
         is ParseResult.DryRun -> {
