@@ -11,6 +11,19 @@ interface TodoItemProps {
   error?: string;
 }
 
+// Helper function to get color based on priority
+const getPriorityColor = (priority: number): string => {
+  switch (priority) {
+    case 0: return '#e0e0e0'; // Light gray
+    case 2: return '#c5e1a5'; // Light green
+    case 4: return '#fff176'; // Light yellow
+    case 6: return '#ffb74d'; // Light orange
+    case 8: return '#ff8a65'; // Light red
+    case 10: return '#e57373'; // Red
+    default: return '#e0e0e0'; // Default light gray
+  }
+};
+
 const TodoItem: React.FC<TodoItemProps> = ({ todo, onComplete, onUncomplete, onTrash, onDelete, onUntrash, error }) => {
   return (
     <div className="todo-item" style={{
@@ -31,8 +44,28 @@ const TodoItem: React.FC<TodoItemProps> = ({ todo, onComplete, onUncomplete, onT
               </p>
             )}
             {todo.username && (
-              <p style={{ margin: '0' }}>
+              <p style={{ margin: '0 0 3px 0' }}>
                 Created by: {todo.username}
+              </p>
+            )}
+            {todo.priority !== undefined && (
+              <p style={{
+                margin: '0',
+                display: 'flex',
+                alignItems: 'center'
+              }}>
+                <span>Priority: </span>
+                <span style={{
+                  display: 'inline-block',
+                  marginLeft: '5px',
+                  padding: '2px 6px',
+                  borderRadius: '3px',
+                  fontWeight: 'bold',
+                  backgroundColor: getPriorityColor(todo.priority),
+                  color: todo.priority > 6 ? 'white' : 'black'
+                }}>
+                  {todo.priority}
+                </span>
               </p>
             )}
           </div>

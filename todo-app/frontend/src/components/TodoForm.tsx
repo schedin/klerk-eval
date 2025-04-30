@@ -8,6 +8,7 @@ interface TodoFormProps {
 const TodoForm: React.FC<TodoFormProps> = ({ onSubmit }) => {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
+  const [priority, setPriority] = useState<number>(0);
 
   // Calculate remaining characters for the title
   const maxTitleLength = 110;
@@ -17,11 +18,12 @@ const TodoForm: React.FC<TodoFormProps> = ({ onSubmit }) => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const success = await onSubmit({ title, description });
+    const success = await onSubmit({ title, description, priority });
     if (success) {
       // Only clear the form on successful submission
       setTitle('');
       setDescription('');
+      setPriority(0);
     }
   };
 
@@ -70,6 +72,29 @@ const TodoForm: React.FC<TodoFormProps> = ({ onSubmit }) => {
             minHeight: '100px'
           }}
         />
+      </div>
+      <div style={{ marginBottom: '15px' }}>
+        <label htmlFor="priority" style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
+          Priority (0-10, even numbers only):
+        </label>
+        <select
+          id="priority"
+          value={priority}
+          onChange={(e) => setPriority(Number(e.target.value))}
+          style={{
+            width: '100%',
+            padding: '8px',
+            borderRadius: '4px',
+            border: '1px solid #ccc'
+          }}
+        >
+          <option value="0">0 - Lowest</option>
+          <option value="2">2 - Low</option>
+          <option value="4">4 - Medium</option>
+          <option value="6">6 - High</option>
+          <option value="8">8 - Very High</option>
+          <option value="10">10 - Highest</option>
+        </select>
       </div>
       <button
         type="submit"
