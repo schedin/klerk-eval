@@ -79,6 +79,18 @@ suspend fun handleCreateTodo(call: ApplicationCall, klerk: Klerk<Ctx, Data>) {
 }
 
 suspend fun indexPage(call: ApplicationCall, klerk: Klerk<Ctx, Data>) {
+    // Set user_info cookie if it doesn't exist
+    if (call.request.cookies["user_info"] == null) {
+        call.response.cookies.append(
+            Cookie(
+                name = "user_info",
+                value = "Alice:admins,users",
+                path = "/",
+                httpOnly = false
+            )
+        )
+    }
+
     val context = call.context(klerk)
     val initialValues = CreateTodoParams(
         title = TodoTitle(""),
