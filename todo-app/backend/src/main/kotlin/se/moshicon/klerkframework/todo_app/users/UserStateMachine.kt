@@ -11,12 +11,12 @@ import se.moshicon.klerkframework.todo_app.notes.DeleteTodoInternalParams
 
 enum class UserStates {
     Created,
-    SoonToBeDeleted,
 }
 
 val userStateMachine = stateMachine {
     event(CreateUser) { }
     event(DeleteUser) { }
+    event(DeleteAllUserTodos) { }
 
     voidState {
         onEvent(CreateUser) {
@@ -25,18 +25,15 @@ val userStateMachine = stateMachine {
     }
 
     state(UserStates.Created) {
-        onEvent(DeleteUser) {
+        onEvent(DeleteAllUserTodos) {
             createCommands(::deleteAllTodosForUser)
-            transitionTo(UserStates.SoonToBeDeleted)
         }
-    }
-    state(UserStates.SoonToBeDeleted) {
-        onEnter {
+
+        onEvent(DeleteUser) {
             delete()
         }
     }
 }
-
 
 fun deleteAllTodosForUser(args: ArgForInstanceEvent<User, Nothing?, Ctx, Data>): List<Command<out Any, out Any>> {
     val userId = args.model.id
@@ -44,19 +41,37 @@ fun deleteAllTodosForUser(args: ArgForInstanceEvent<User, Nothing?, Ctx, Data>):
         it.props.userID == userId
     }
 //    var allUserTodos = args.reader.getRelated(Todo::class, args.model.id)
-//    println("allUserTodos: ${allUserTodos.size}")
+    println("allUserTodos: ${allUserTodos.size}")
     return allUserTodos.map { todoModel ->
         Command(
             event = DeleteTodoInternal,
             model = todoModel.id,
             params = DeleteTodoInternalParams(),
-//            params = null,
         )
     }
 }
 
+//fun deleteAllTodosForUser(args: ArgForInstanceEvent<User, Nothing?, Ctx, Data>): List<Command<out Any, out Any>> {
+//    val userId = args.model.id
+//    val allUserTodos = args.reader.list(args.reader.data.todos.all) {
+//        it.props.userID == userId
+//    }
+////    var allUserTodos = args.reader.getRelated(Todo::class, args.model.id)
+//    println("allUserTodos: ${allUserTodos.size}")
+//    return allUserTodos.map { todoModel ->
+//        Command(
+//            event = DeleteTodoInternal,
+//            model = todoModel.id,
+//            params = DeleteTodoInternalParams(),
+////            params = null,
+//        )
+//    }
+//}
+
 object CreateUser : VoidEventWithParameters<User, CreateUserParams>(User::class, true, CreateUserParams::class)
 object DeleteUser : InstanceEventNoParameters<User>(User::class, true)
+object DeleteAllUserTodos: InstanceEventNoParameters<User>(User::class, false)
+
 
 fun createUser(args: ArgForVoidEvent<User, CreateUserParams, Ctx, Data>): User {
     return User(name = args.command.params.name)

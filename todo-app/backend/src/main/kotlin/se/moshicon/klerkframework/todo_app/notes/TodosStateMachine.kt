@@ -1,6 +1,7 @@
 package se.moshicon.klerkframework.todo_app.notes
 
 import dev.klerkframework.klerk.*
+import dev.klerkframework.klerk.command.Command
 import dev.klerkframework.klerk.statemachine.stateMachine
 import kotlinx.datetime.Instant
 import se.moshicon.klerkframework.todo_app.Ctx
@@ -92,11 +93,29 @@ object MoveToTrash : InstanceEventNoParameters<Todo>(Todo::class, true)
 object RecoverFromTrash : InstanceEventNoParameters<Todo>(Todo::class, true)
 object DeleteFromTrash : InstanceEventNoParameters<Todo>(Todo::class, true)
 object DeleteTodoInternal : InstanceEventWithParameters<Todo, DeleteTodoInternalParams>(Todo::class, false, DeleteTodoInternalParams::class)
-class DeleteTodoInternalParams // Dummy params class workaround Kotlin generics type system with respect to nullability
+class DeleteTodoInternalParams // Dummy params workaround because Kotlin generics type system with respect to nullability
 //object DeleteTodoInternal : InstanceEventNoParameters<Todo>(Todo::class, false)
 
 
 fun autoDeleteTodoInTrashTime(args: ArgForInstanceNonEvent<Todo, Ctx, Data>): Instant {
     return args.time.plus(1.days)
     //return args.time.plus(1.minutes)
+}
+
+
+fun deleteAllTodosForUser(args: ArgForInstanceEvent<User, Nothing?, Ctx, Data>): List<Command<out Any, out Any>> {
+    val userId = args.model.id
+    val allUserTodos = args.reader.list(args.reader.data.todos.all) {
+        it.props.userID == userId
+    }
+//    var allUserTodos = args.reader.getRelated(Todo::class, args.model.id)
+    println("allUserTodos: ${allUserTodos.size}")
+    return allUserTodos.map { todoModel ->
+        Command(
+            event = DeleteTodoInternal,
+            model = todoModel.id,
+            params = DeleteTodoInternalParams(),
+//            params = null,
+        )
+    }
 }

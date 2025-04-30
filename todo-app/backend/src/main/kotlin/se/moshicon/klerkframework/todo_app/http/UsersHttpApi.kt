@@ -16,6 +16,7 @@ import io.ktor.server.routing.*
 import kotlinx.serialization.Serializable
 import se.moshicon.klerkframework.todo_app.Ctx
 import se.moshicon.klerkframework.todo_app.Data
+import se.moshicon.klerkframework.todo_app.users.DeleteAllUserTodos
 import se.moshicon.klerkframework.todo_app.users.DeleteUser
 import se.moshicon.klerkframework.todo_app.users.User
 
@@ -56,6 +57,23 @@ suspend fun deleteUser(call: ApplicationCall, klerk: Klerk<Ctx, Data>) {
         call.respond(HttpStatusCode.NotFound, "User $username not found")
         return
     }
+    val commandToken = CommandToken.simple()
+
+    // The current implementation of Klerk state machine handling does allow deleting of todos and the user in the
+    // same transaction. To workaround this, we first delete all todos for the user.
+    Command(
+        event = DeleteAllUserTodos,
+        model = userToDelete.id,
+        params = null,
+    ).run {
+        when(val result = klerk.handle(this, context, ProcessingOptions(commandToken))) {
+            is Failure -> {
+                call.respond(HttpStatusCode.BadRequest, result.problem.toString())
+                return
+            }
+            is Success -> { }
+        }
+    }
 
     val command = Command(
         event = DeleteUser,
@@ -70,5 +88,4 @@ suspend fun deleteUser(call: ApplicationCall, klerk: Klerk<Ctx, Data>) {
             call.respond(HttpStatusCode.NoContent)
         }
     }
-
 }
