@@ -52,10 +52,11 @@ data class TodoResponse(
     val state: String,
     val createdAt: Instant,
     val username: String,
+    val priority: Int,
 )
 
 @Serializable
-data class CreateTodoRequest(val title: String, val description: String)
+data class CreateTodoRequest(val title: String, val description: String, val priority: Int)
 
 private fun toTodoResponse(todo: Model<Todo>, username: String) = TodoResponse(
     todoID = todo.id.toString(),
@@ -63,7 +64,8 @@ private fun toTodoResponse(todo: Model<Todo>, username: String) = TodoResponse(
     description = todo.props.description.value,
     state = todo.state,
     createdAt = todo.createdAt,
-    username = username
+    username = username,
+    priority = todo.props.priority.value,
 )
 
 suspend fun getTodos(call: ApplicationCall, klerk: Klerk<Ctx, Data>) {
@@ -91,7 +93,7 @@ suspend fun createTodo(call: ApplicationCall, klerk: Klerk<Ctx, Data>) {
             title = TodoTitle(params.title),
             description = TodoDescription(params.description),
             username = user.name,
-            priority = TodoPriority(0)
+            priority = TodoPriority(params.priority),
         ),
     )
     when(val result = klerk.handle(command, context, ProcessingOptions(CommandToken.simple()))) {
