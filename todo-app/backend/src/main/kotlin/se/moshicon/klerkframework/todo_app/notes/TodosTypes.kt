@@ -27,7 +27,7 @@ class TodoPriority(value: Int) : IntContainer(value) {
 }
 
 class TodoTitle(value: String) : StringContainer(value) {
-    override val minLength = 0
+    override val minLength = 1
     override val maxLength = 100
     override val maxLines = 1
 }
