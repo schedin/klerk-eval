@@ -70,6 +70,10 @@ fun Application.configureHttpRouting(klerk: Klerk<Ctx, Data>) {
             }
         }
 
+        route("/serverside") {
+            apply(registerServersideRoutes(klerk))
+        }
+
         // The auto-generated Admin UI
         val autoAdminUI = LowCodeMain(klerk, lowCodeConfig)
         apply(autoAdminUI.registerRoutes())
