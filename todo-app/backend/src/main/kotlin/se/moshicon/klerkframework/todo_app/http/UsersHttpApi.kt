@@ -45,7 +45,7 @@ suspend fun getUsers(call: ApplicationCall, klerk: Klerk<Ctx, Data>) {
 
 
 suspend fun deleteUser(call: ApplicationCall, klerk: Klerk<Ctx, Data>) {
-    val context = Ctx(AuthenticationIdentity)
+    var context = Ctx(AuthenticationIdentity)
     val username = call.parameters["username"]
     val userToDelete = klerk.read(context) {
         firstOrNull(data.users.all) {
@@ -57,7 +57,6 @@ suspend fun deleteUser(call: ApplicationCall, klerk: Klerk<Ctx, Data>) {
         call.respond(HttpStatusCode.NotFound, "User $username not found")
         return
     }
-    val commandToken = CommandToken.simple()
 
     // The current implementation of Klerk state machine handling does allow deleting of todos and the user in the
     // same transaction. To workaround this, we first delete all todos for the user.
@@ -66,7 +65,7 @@ suspend fun deleteUser(call: ApplicationCall, klerk: Klerk<Ctx, Data>) {
         model = userToDelete.id,
         params = null,
     ).run {
-        when(val result = klerk.handle(this, context, ProcessingOptions(commandToken))) {
+        when(val result = klerk.handle(this, context, ProcessingOptions(CommandToken.simple()))) {
             is Failure -> {
                 call.respond(HttpStatusCode.BadRequest, result.problem.toString())
                 return
@@ -74,6 +73,8 @@ suspend fun deleteUser(call: ApplicationCall, klerk: Klerk<Ctx, Data>) {
             is Success -> { }
         }
     }
+
+    context = Ctx(AuthenticationIdentity)
 
     val command = Command(
         event = DeleteUser,
