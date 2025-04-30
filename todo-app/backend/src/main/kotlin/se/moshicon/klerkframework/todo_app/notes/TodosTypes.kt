@@ -16,12 +16,15 @@ data class Todo(
 class TodoPriority(value: Int) : IntContainer(value) {
     override val min = 0
     override val max = 10
-//    override val validators = setOf<() -> InvalidParametersProblem?>( ::checkMe )
-}
+    override val validators = setOf<() -> InvalidParametersProblem?>( ::checkMe )
 
-//fun checkMe(): InvalidParametersProblem? {
-//    return null
-//}
+    fun checkMe(): InvalidParametersProblem? {
+        if (this.value % 2 != 0) {
+            return InvalidParametersProblem(message = "Only even priorities are allowed. (what!?)")
+        }
+        return null
+    }
+}
 
 class TodoTitle(value: String) : StringContainer(value) {
     override val minLength = 0
@@ -34,4 +37,3 @@ class TodoDescription(value: String) : StringContainer(value) {
     override val maxLength = 100000
     override val maxLines = Int.MAX_VALUE
 }
-

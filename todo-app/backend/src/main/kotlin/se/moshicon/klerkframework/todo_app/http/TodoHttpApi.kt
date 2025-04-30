@@ -90,7 +90,8 @@ suspend fun createTodo(call: ApplicationCall, klerk: Klerk<Ctx, Data>) {
         params = CreateTodoParams(
             title = TodoTitle(params.title),
             description = TodoDescription(params.description),
-            username = user.name
+            username = user.name,
+            priority = TodoPriority(0)
         ),
     )
     when(val result = klerk.handle(command, context, ProcessingOptions(CommandToken.simple()))) {

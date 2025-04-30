@@ -36,7 +36,7 @@ object FormTemplates {
             text(CreateTodoParams::title)
             text(CreateTodoParams::description)
             populatedAfterSubmit(CreateTodoParams::username)
-            //text(CreateTodoParams::username)
+            remaining()
         }
     }
 }
@@ -120,6 +120,7 @@ suspend fun indexPage(call: ApplicationCall, klerk: Klerk<Ctx, Data>) {
     val initialValues = CreateTodoParams(
         title = TodoTitle(""),
         description = TodoDescription(""),
+        priority = TodoPriority(0),
         username = UserName("Alice"),
     )
 
