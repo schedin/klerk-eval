@@ -1,12 +1,17 @@
 package se.moshicon.klerkframework.todo_app.notes
 
 import dev.klerkframework.klerk.*
+import dev.klerkframework.klerk.actions.Job
+import dev.klerkframework.klerk.actions.JobContext
+import dev.klerkframework.klerk.actions.JobId
+import dev.klerkframework.klerk.actions.JobResult
 import dev.klerkframework.klerk.statemachine.stateMachine
 import kotlinx.datetime.Instant
 import se.moshicon.klerkframework.todo_app.Ctx
 import se.moshicon.klerkframework.todo_app.Data
 import se.moshicon.klerkframework.todo_app.notes.TodoStates.*
 import se.moshicon.klerkframework.todo_app.users.GroupModelIdentity
+import se.moshicon.klerkframework.todo_app.users.User
 import se.moshicon.klerkframework.todo_app.users.UserName
 import kotlin.time.Duration.Companion.days
 import kotlin.time.Duration.Companion.seconds
@@ -41,6 +46,10 @@ val todoStateMachine = stateMachine {
     }
 
     state(Created) {
+        onEnter {
+            job(::updateUserBill)
+        }
+
         onEvent(MoveToTrash) {
             transitionTo(Trashed)
         }
@@ -78,6 +87,22 @@ val todoStateMachine = stateMachine {
             delete()
         }
     }
+}
+
+fun updateUserBill(args: ArgForInstanceNonEvent<Todo, Ctx, Data>): List<Job<Ctx, Data>> {
+    val userID = args.model.props.userID
+
+    class Myjob(val userID: ModelID<User>) : Job<Ctx, Data>{
+        override val id: JobId = -1
+        override suspend fun run(jobContext: JobContext<Ctx, Data>): JobResult {
+
+        }
+    }
+
+
+
+
+    return emptyList()
 }
 
 fun rateLimitCompletionStatus(args: ArgForInstanceEvent<Todo, Nothing?, Ctx, Data>): Validity {
