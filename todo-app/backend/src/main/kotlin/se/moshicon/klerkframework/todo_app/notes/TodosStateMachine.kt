@@ -95,13 +95,9 @@ fun updateUserBill(args: ArgForInstanceNonEvent<Todo, Ctx, Data>): List<Job<Ctx,
     class Myjob(val userID: ModelID<User>) : Job<Ctx, Data>{
         override val id: JobId = -1
         override suspend fun run(jobContext: JobContext<Ctx, Data>): JobResult {
-
+            return JobResult.Success
         }
     }
-
-
-
-
     return emptyList()
 }
 
