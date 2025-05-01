@@ -296,7 +296,7 @@ function App() {
               cursor: 'pointer'
             }}
           >
-            All
+            All ({todos.filter(todo => todo.state !== 'Trashed').length})
           </button>
           <button
             onClick={() => {
@@ -312,7 +312,7 @@ function App() {
               cursor: 'pointer'
             }}
           >
-            Active
+            Active ({todos.filter(todo => todo.state === 'Created').length})
           </button>
           <button
             onClick={() => {
@@ -328,7 +328,7 @@ function App() {
               cursor: 'pointer'
             }}
           >
-            Completed
+            Completed ({todos.filter(todo => todo.state === 'Completed').length})
           </button>
           <button
             onClick={() => {
@@ -344,7 +344,7 @@ function App() {
               cursor: 'pointer'
             }}
           >
-            Trash
+            Trash ({todos.filter(todo => todo.state === 'Trashed').length})
           </button>
         </div>
       </div>
