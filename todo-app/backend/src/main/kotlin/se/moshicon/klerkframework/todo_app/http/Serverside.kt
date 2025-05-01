@@ -13,8 +13,7 @@ import io.ktor.server.application.*
 import io.ktor.server.html.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
-import kotlinx.html.body
-import kotlinx.html.h2
+import kotlinx.html.*
 import se.moshicon.klerkframework.todo_app.Ctx
 import se.moshicon.klerkframework.todo_app.Data
 import se.moshicon.klerkframework.todo_app.notes.*
@@ -145,8 +144,29 @@ suspend fun indexPage(call: ApplicationCall, klerk: Klerk<Ctx, Data>) {
             h2 {
                 +"Todos:"
             }
-
-
+            
+            table {
+                thead {
+                    tr {
+                        th { +"Title" }
+                        th { +"Description" }
+                        th { +"Priority" }
+                        th { +"Created By" }
+                        th { +"Status" }
+                    }
+                }
+                tbody {
+                    todos.forEach { (todo, username) ->
+                        tr {
+                            td { +todo.props.title.value }
+                            td { +todo.props.description.value }
+                            td { +todo.props.priority.value.toString() }
+                            td { +username }
+                            td { +todo.state }
+                        }
+                    }
+                }
+            }
         }
     }
 }
