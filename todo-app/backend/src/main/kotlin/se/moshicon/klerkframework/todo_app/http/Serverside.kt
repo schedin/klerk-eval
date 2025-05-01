@@ -14,6 +14,7 @@ import io.ktor.server.html.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import kotlinx.html.body
+import kotlinx.html.h2
 import se.moshicon.klerkframework.todo_app.Ctx
 import se.moshicon.klerkframework.todo_app.Data
 import se.moshicon.klerkframework.todo_app.notes.*
@@ -128,9 +129,24 @@ suspend fun indexPage(call: ApplicationCall, klerk: Klerk<Ctx, Data>) {
         FormTemplates.createTodoTemplate.build(call, initialValues, this, translator = context.translator)
     }
 
+    val todos = klerk.read(context) {
+        listIfAuthorized(data.todos.all).map { todo ->
+            val username = get(todo.props.userID).props.name.value
+            todo to username
+        }
+    }
+    todos.forEach {
+        println("todo: $it")
+    }
+
     call.respondHtml {
         body {
             createTodoForm.render(this)
+            h2 {
+                +"Todos:"
+            }
+
+
         }
     }
 }
