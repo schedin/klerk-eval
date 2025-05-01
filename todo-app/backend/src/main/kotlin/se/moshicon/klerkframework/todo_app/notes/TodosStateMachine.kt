@@ -18,7 +18,10 @@ enum class TodoStates {
 }
 
 val todoStateMachine = stateMachine {
-    event(CreateTodo) { }
+    event(CreateTodo) {
+        validateWithParameters(::titleCannotContainOnlyWhitespaces)
+        validateWithParameters(::titleCannotContainBannedWords)
+    }
     event(MarkComplete) { }
     event(UnmarkComplete) { }
     event(MoveToTrash) { }
@@ -70,6 +73,25 @@ val todoStateMachine = stateMachine {
             delete()
         }
     }
+}
+
+fun titleCannotContainOnlyWhitespaces(args: ArgForVoidEvent<Todo, CreateTodoParams, Ctx, Data>): Validity {
+    val titleString = args.command.params.title.value
+    if (titleString.trim().isEmpty()) {
+        return Validity.Invalid("Title cannot contain only whitespaces")
+    }
+    return Validity.Valid
+}
+
+fun titleCannotContainBannedWords(args: ArgForVoidEvent<Todo, CreateTodoParams, Ctx, Data>): Validity {
+    val titleString = args.command.params.title.value
+    val bannedWords = listOf("hello", "world")
+    for (word in bannedWords) {
+        if (titleString.contains(word)) {
+            return Validity.Invalid("Title cannot contain the banned word \"$word\"")
+        }
+    }
+    return Validity.Valid
 }
 
 object CreateTodo : VoidEventWithParameters<Todo, CreateTodoParams>(Todo::class, true, CreateTodoParams::class)
