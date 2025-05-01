@@ -9,6 +9,7 @@ import se.moshicon.klerkframework.todo_app.notes.TodoStates.*
 import se.moshicon.klerkframework.todo_app.users.GroupModelIdentity
 import se.moshicon.klerkframework.todo_app.users.UserName
 import kotlin.time.Duration.Companion.days
+import kotlin.time.Duration.Companion.seconds
 
 
 enum class TodoStates {
@@ -22,8 +23,12 @@ val todoStateMachine = stateMachine {
         validateWithParameters(::titleCannotContainOnlyWhitespaces)
         validateWithParameters(::titleCannotContainBannedWords)
     }
-    event(MarkComplete) { }
-    event(UnmarkComplete) { }
+    event(MarkComplete) {
+        validate(::rateLimitCompletionStatus)
+    }
+    event(UnmarkComplete) {
+        validate(::rateLimitCompletionStatus)
+    }
     event(MoveToTrash) { }
     event(RecoverFromTrash) { }
     event(DeleteFromTrash) { }
@@ -73,6 +78,16 @@ val todoStateMachine = stateMachine {
             delete()
         }
     }
+}
+
+fun rateLimitCompletionStatus(args: ArgForInstanceEvent<Todo, Nothing?, Ctx, Data>): Validity {
+    val lastStateTransitionAt = args.model.lastStateTransitionAt
+    val currentTime = args.context.time
+    val duration = 1.seconds
+    if (currentTime - lastStateTransitionAt < duration) {
+        return Validity.Invalid("You can only change the completion status every $duration.")
+    }
+    return Validity.Valid
 }
 
 fun titleCannotContainOnlyWhitespaces(args: ArgForVoidEvent<Todo, CreateTodoParams, Ctx, Data>): Validity {
