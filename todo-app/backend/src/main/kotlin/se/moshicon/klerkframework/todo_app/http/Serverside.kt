@@ -134,10 +134,6 @@ suspend fun indexPage(call: ApplicationCall, klerk: Klerk<Ctx, Data>) {
             todo to username
         }
     }
-    todos.forEach {
-        println("todo: $it")
-    }
-
     call.respondHtml {
         body {
             createTodoForm.render(this)
