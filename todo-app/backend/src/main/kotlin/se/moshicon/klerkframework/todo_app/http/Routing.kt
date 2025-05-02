@@ -8,7 +8,7 @@ import dev.klerkframework.klerk.command.CommandToken
 import dev.klerkframework.klerk.command.ProcessingOptions
 import dev.klerkframework.web.LowCodeConfig
 import dev.klerkframework.web.LowCodeMain
-import dev.klerkframework.mcp.KlerkMcpMain
+import dev.klerkframework.mcp.configureMcpServer
 
 import io.ktor.http.*
 import io.ktor.server.application.*
@@ -83,7 +83,7 @@ fun Application.configureHttpRouting(klerk: Klerk<Ctx, Data>) {
 
 
         route("/mcp") {
-            KlerkMcpMain.registerMcp()
+            configureMcpServer()
         }
     }
 }
