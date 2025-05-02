@@ -124,7 +124,7 @@ fun titleCannotContainBannedWords(args: ArgForVoidEvent<Todo, CreateTodoParams, 
     val bannedWords = listOf("hello", "world")
     for (word in bannedWords) {
         if (titleString.lowercase().contains(word)) {
-            return Validity.Invalid("Title cannot contain the banned word \"$word\"")
+            return Validity.Invalid("Title cannot contain the banned word '$word'")
         }
     }
     return Validity.Valid
