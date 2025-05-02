@@ -49,12 +49,12 @@ fun Application.configureHttpRouting(klerk: Klerk<Ctx, Data>) {
     }
 
     suspend fun contextFromCall(call: ApplicationCall): Ctx = call.context(klerk)
-    val lowCodeConfig = LowCodeConfig(
-        basePath = "/admin",
-        contextProvider = ::contextFromCall,
-        showOptionalParameters = { false },
-        cssPath = "https://unpkg.com/almond.css@latest/dist/almond.min.css",
-    )
+//    val lowCodeConfig = LowCodeConfig(
+//        basePath = "/admin",
+//        contextProvider = ::contextFromCall,
+//        showOptionalParameters = { false },
+//        cssPath = "https://unpkg.com/almond.css@latest/dist/almond.min.css",
+//    )
 
     routing {
         route("/api") {
@@ -76,9 +76,9 @@ fun Application.configureHttpRouting(klerk: Klerk<Ctx, Data>) {
             apply(registerServersideRoutes(klerk))
         }
 
-        // The auto-generated Admin UI
-        val autoAdminUI = LowCodeMain(klerk, lowCodeConfig)
-        apply(autoAdminUI.registerRoutes())
+//        // The auto-generated Admin UI
+//        val autoAdminUI = LowCodeMain(klerk, lowCodeConfig)
+//        apply(autoAdminUI.registerRoutes())
 
 
 

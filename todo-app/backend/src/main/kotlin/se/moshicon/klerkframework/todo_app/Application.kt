@@ -20,7 +20,7 @@ fun main() {
         klerk.meta.start()
         createInitialUsers(klerk)
     }
-    embeddedServer(Netty, port = 8080, host = "0.0.0.0", module = {
+    embeddedServer(Netty, port = 8080, host = "0.0.0.0") {
         // Configure CORS to allow frontend requests
         install(CORS) {
             allowMethod(HttpMethod.Options)
@@ -44,5 +44,5 @@ fun main() {
         install(SSE)
 
         configureHttpRouting(klerk)
-    }).start(wait = true)
+    }.start(wait = true)
 }
