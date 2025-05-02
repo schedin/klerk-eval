@@ -21,8 +21,6 @@ application {
     mainClass.set("se.moshicon.klerkframework.todo_app.ApplicationKt")
 }
 
-
-
 dependencies {
     implementation("com.github.klerk-framework:klerk:$klerk_version")
     implementation("com.github.klerk-framework:klerk-web:$klerk_web_version")
