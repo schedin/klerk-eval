@@ -77,6 +77,25 @@ fun Application.configureHttpRouting(klerk: Klerk<Ctx, Data>) {
         // The auto-generated Admin UI
         val autoAdminUI = LowCodeMain(klerk, lowCodeConfig)
         apply(autoAdminUI.registerRoutes())
+
+
+
+        route("/mcp") {
+            mcp {
+//                Server(
+//                    serverInfo = Implementation(
+//                        name = "example-sse-server",
+//                        version = "1.0.0"
+//                    ),
+//                    options = ServerOptions(
+//                        capabilities = ServerCapabilities(
+//                            prompts = ServerCapabilities.Prompts(listChanged = null),
+//                            resources = ServerCapabilities.Resources(subscribe = null, listChanged = null)
+//                        )
+//                    )
+//                )
+            }
+        }
     }
 }
 
