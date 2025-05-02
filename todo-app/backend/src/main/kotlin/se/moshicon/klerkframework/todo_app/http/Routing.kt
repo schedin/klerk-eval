@@ -8,6 +8,7 @@ import dev.klerkframework.klerk.command.CommandToken
 import dev.klerkframework.klerk.command.ProcessingOptions
 import dev.klerkframework.web.LowCodeConfig
 import dev.klerkframework.web.LowCodeMain
+import dev.klerkframework.mcp.KlerkMcpMain
 
 import io.ktor.http.*
 import io.ktor.server.application.*
@@ -18,6 +19,7 @@ import io.ktor.server.routing.*
 import se.moshicon.klerkframework.todo_app.Ctx
 import se.moshicon.klerkframework.todo_app.Data
 import se.moshicon.klerkframework.todo_app.users.*
+
 
 // JWT configuration constants
 // Note: In this demo, we're using a simplified JWT implementation without real verification
@@ -81,20 +83,7 @@ fun Application.configureHttpRouting(klerk: Klerk<Ctx, Data>) {
 
 
         route("/mcp") {
-            mcp {
-//                Server(
-//                    serverInfo = Implementation(
-//                        name = "example-sse-server",
-//                        version = "1.0.0"
-//                    ),
-//                    options = ServerOptions(
-//                        capabilities = ServerCapabilities(
-//                            prompts = ServerCapabilities.Prompts(listChanged = null),
-//                            resources = ServerCapabilities.Resources(subscribe = null, listChanged = null)
-//                        )
-//                    )
-//                )
-            }
+            KlerkMcpMain.registerMcp()
         }
     }
 }
