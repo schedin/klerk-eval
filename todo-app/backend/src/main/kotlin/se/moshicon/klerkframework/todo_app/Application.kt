@@ -8,6 +8,7 @@ import io.ktor.server.plugins.cors.routing.*
 import io.ktor.serialization.kotlinx.json.*
 import io.ktor.server.application.*
 import io.ktor.http.*
+import io.ktor.server.sse.SSE
 
 import kotlinx.coroutines.runBlocking
 import se.moshicon.klerkframework.todo_app.http.configureHttpRouting
@@ -39,6 +40,8 @@ fun main() {
         install(ContentNegotiation) {
             json()
         }
+
+        install(SSE)
 
         configureHttpRouting(klerk)
     }).start(wait = true)
