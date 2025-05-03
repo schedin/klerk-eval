@@ -48,22 +48,20 @@ fun main() {
         install(ContentNegotiation) {
             json()
         }
+        configureHttpRouting(klerk)
 
-//        install(SSE)
-//        configureHttpRouting(klerk)
-
-        mcp {
-            getMcpServer()
+        install(SSE)
+        routing {
+            route("myRoute") {
+                mcp {
+                    getMcpServer()
+                }
+            }
         }
-
-//        install(SSE)
-//        routing {
-//            route("myRoute") {
-//                mcp {
-//                    getMcpServer()
-//                }
-//            }
+//        mcp {
+//            getMcpServer()
 //        }
+
 
     }.start(wait = true)
 }
