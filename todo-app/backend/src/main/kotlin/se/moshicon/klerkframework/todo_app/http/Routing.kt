@@ -111,9 +111,7 @@ fun Application.configureHttpRouting(klerk: Klerk<Ctx, Data>) {
 //        apply(configureMcpServer())
 //    }
 
-    mcp {
-        getMcpServer()
-    }
+
 }
 
 /**
