@@ -50,17 +50,17 @@ fun main() {
         }
         configureHttpRouting(klerk)
 
-        install(SSE)
-        routing {
-            route("myRoute") {
-                mcp {
-                    getMcpServer()
-                }
-            }
-        }
-//        mcp {
-//            getMcpServer()
+//        install(SSE)
+//        routing {
+//            route("myRoute") {
+//                mcp {
+//                    getMcpServer()
+//                }
+//            }
 //        }
+        mcp {
+            getMcpServer()
+        }
 
 
     }.start(wait = true)
