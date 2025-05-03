@@ -16,10 +16,15 @@ import io.ktor.server.auth.*
 import io.ktor.server.auth.jwt.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
+import io.modelcontextprotocol.kotlin.sdk.Implementation
+import io.modelcontextprotocol.kotlin.sdk.ServerCapabilities
+import io.modelcontextprotocol.kotlin.sdk.server.Server
+import io.modelcontextprotocol.kotlin.sdk.server.ServerOptions
+import io.modelcontextprotocol.kotlin.sdk.server.mcp
 import se.moshicon.klerkframework.todo_app.Ctx
 import se.moshicon.klerkframework.todo_app.Data
 import se.moshicon.klerkframework.todo_app.users.*
-
+import io.ktor.server.sse.SSE
 
 // JWT configuration constants
 // Note: In this demo, we're using a simplified JWT implementation without real verification
@@ -81,11 +86,29 @@ fun Application.configureHttpRouting(klerk: Klerk<Ctx, Data>) {
 //        apply(autoAdminUI.registerRoutes())
 
 
-
-        route("/mcp") {
-            configureMcpServer()
-        }
+//        route("/mcp") {
+//            mcp {
+//                Server(
+//                    serverInfo = Implementation(
+//                        name = "example-sse-server",
+//                        version = "1.0.0"
+//                    ),
+//                    options = ServerOptions(
+//                        capabilities = ServerCapabilities(
+//                            prompts = ServerCapabilities.Prompts(listChanged = null),
+//                            resources = ServerCapabilities.Resources(subscribe = null, listChanged = null)
+//                        )
+//                    )
+//                )
+//            }
+//        }
     }
+//
+//    routing {
+//        install(SSE)
+//
+//        apply(configureMcpServer())
+//    }
 }
 
 /**
