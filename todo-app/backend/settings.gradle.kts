@@ -9,8 +9,8 @@ dependencyResolutionManagement {
 }
 
 includeBuild("../../../klerk-mcp") {
-    dependencySubstitution {
-        substitute(module("dev.klerkframework:klerk-mcp"))
-            .using(project(":"))
-    }
+//    dependencySubstitution {
+//        substitute(module("dev.klerkframework:klerk-mcp"))
+//            .using(project(":"))
+//    }
 }
