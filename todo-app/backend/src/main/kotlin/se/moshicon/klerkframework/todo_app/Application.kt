@@ -21,7 +21,7 @@ fun main() {
         klerk.meta.start()
         createInitialUsers(klerk)
     }
-    val mcpServer = createMcpServer()
+    val mcpServer = createMcpServer(klerk)
     embeddedServer(Netty, port = 8080, host = "0.0.0.0") {
         // Configure CORS to allow frontend requests
         install(CORS) {
@@ -52,6 +52,8 @@ fun main() {
 //                }
 //            }
 //        }
+        //Due do a bug in kotlin-sdk for MCP (https://github.com/modelcontextprotocol/kotlin-sdk/issues/94) it is
+        // currently not possible to control the URL for the MCP server.
         mcp {
             mcpServer
         }
