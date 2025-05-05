@@ -6,10 +6,6 @@ import dev.klerkframework.klerk.*
 import dev.klerkframework.klerk.command.Command
 import dev.klerkframework.klerk.command.CommandToken
 import dev.klerkframework.klerk.command.ProcessingOptions
-import dev.klerkframework.web.LowCodeConfig
-import dev.klerkframework.web.LowCodeMain
-import dev.klerkframework.mcp.configureMcpServer
-import dev.klerkframework.mcp.getMcpServer
 
 import io.ktor.http.*
 import io.ktor.server.application.*
@@ -17,15 +13,9 @@ import io.ktor.server.auth.*
 import io.ktor.server.auth.jwt.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
-import io.modelcontextprotocol.kotlin.sdk.Implementation
-import io.modelcontextprotocol.kotlin.sdk.ServerCapabilities
-import io.modelcontextprotocol.kotlin.sdk.server.Server
-import io.modelcontextprotocol.kotlin.sdk.server.ServerOptions
-import io.modelcontextprotocol.kotlin.sdk.server.mcp
 import se.moshicon.klerkframework.todo_app.Ctx
 import se.moshicon.klerkframework.todo_app.Data
 import se.moshicon.klerkframework.todo_app.users.*
-import io.ktor.server.sse.SSE
 
 // JWT configuration constants
 // Note: In this demo, we're using a simplified JWT implementation without real verification
@@ -54,7 +44,7 @@ fun Application.configureHttpRouting(klerk: Klerk<Ctx, Data>) {
         }
     }
 
-    suspend fun contextFromCall(call: ApplicationCall): Ctx = call.context(klerk)
+//    suspend fun contextFromCall(call: ApplicationCall): Ctx = call.context(klerk)
 //    val lowCodeConfig = LowCodeConfig(
 //        basePath = "/admin",
 //        contextProvider = ::contextFromCall,
