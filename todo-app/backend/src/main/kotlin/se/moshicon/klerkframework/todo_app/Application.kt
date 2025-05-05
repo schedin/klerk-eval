@@ -13,6 +13,7 @@ import io.modelcontextprotocol.kotlin.sdk.server.mcp
 
 import kotlinx.coroutines.runBlocking
 import se.moshicon.klerkframework.todo_app.http.configureHttpRouting
+import se.moshicon.klerkframework.todo_app.http.findOrCreateUser
 import se.moshicon.klerkframework.todo_app.users.*
 
 fun main() {
@@ -21,7 +22,14 @@ fun main() {
         klerk.meta.start()
         createInitialUsers(klerk)
     }
-    val mcpServer = createMcpServer(klerk)
+
+    suspend fun contextProvider(): Ctx {
+        val user = findOrCreateUser(klerk, "Alice")
+        return Ctx(GroupModelIdentity(model = user, groups = listOf("admins", "users")))
+    }
+
+
+    val mcpServer = createMcpServer(klerk, ::contextProvider)
     embeddedServer(Netty, port = 8080, host = "0.0.0.0") {
         // Configure CORS to allow frontend requests
         install(CORS) {
@@ -61,3 +69,4 @@ fun main() {
 
     }.start(wait = true)
 }
+
