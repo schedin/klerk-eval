@@ -29,7 +29,7 @@ fun main() {
     }
 
 
-    val mcpServer = createMcpServer(klerk, ::contextProvider)
+    val mcpServer = createMcpServer(klerk, ::contextProvider, "TODO application", "1.0.0")
     embeddedServer(Netty, port = 8080, host = "0.0.0.0") {
         // Configure CORS to allow frontend requests
         install(CORS) {
