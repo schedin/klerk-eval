@@ -1,6 +1,7 @@
 package se.moshicon.klerkframework.todo_app
 
 import dev.klerkframework.klerk.Klerk
+import dev.klerkframework.klerk.command.Command
 import dev.klerkframework.mcp.createMcpServer
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
@@ -23,11 +24,10 @@ fun main() {
         createInitialUsers(klerk)
     }
 
-    suspend fun contextProvider(): Ctx {
+    suspend fun contextProvider(command: Command<*, *>?): Ctx {
         val user = findOrCreateUser(klerk, "Alice")
         return Ctx(GroupModelIdentity(model = user, groups = listOf("admins", "users")))
     }
-
 
     val mcpServer = createMcpServer(klerk, ::contextProvider, "TODO application", "1.0.0")
     embeddedServer(Netty, port = 8080, host = "0.0.0.0") {
