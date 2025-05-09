@@ -1,7 +1,10 @@
 package se.moshicon.klerkframework.todo_app
 
+import dev.klerkframework.klerk.AuthenticationIdentity
 import dev.klerkframework.klerk.Klerk
 import dev.klerkframework.klerk.command.Command
+import dev.klerkframework.klerk.command.CommandToken
+import dev.klerkframework.klerk.command.ProcessingOptions
 import dev.klerkframework.mcp.createMcpServer
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
@@ -11,10 +14,12 @@ import io.ktor.serialization.kotlinx.json.*
 import io.ktor.server.application.*
 import io.ktor.http.*
 import io.modelcontextprotocol.kotlin.sdk.server.mcp
+import kotlinx.coroutines.delay
 
 import kotlinx.coroutines.runBlocking
 import se.moshicon.klerkframework.todo_app.http.configureHttpRouting
 import se.moshicon.klerkframework.todo_app.http.findOrCreateUser
+import se.moshicon.klerkframework.todo_app.notes.*
 import se.moshicon.klerkframework.todo_app.users.*
 
 fun main() {
@@ -24,10 +29,36 @@ fun main() {
         createInitialUsers(klerk)
     }
 
+    // Simple performance test
+    runBlocking {
+        val aliceUser = klerk.read(Ctx(AuthenticationIdentity)) {
+            getFirstWhere(data.users.all) { it.props.name.value == "Alice" }
+        }
+
+        for (i in 0 until 1000) {
+            val context = Ctx(GroupModelIdentity(model = aliceUser, groups = listOf("admins", "users")))
+            val command = Command(
+                event = CreateTodo,
+                model = null,
+                params = CreateTodoParams(
+                    title = TodoTitle("test Title"),
+                    description = TodoDescription("test desc"),
+                    username = UserName("Alice"),
+                    priority = TodoPriority(4),
+                ),
+            )
+            val result = klerk.handle(command, context, ProcessingOptions(CommandToken.simple()))
+//            println(result)
+//            delay(1)
+        }
+    }
+
+
     suspend fun contextProvider(command: Command<*, *>?): Ctx {
         val user = findOrCreateUser(klerk, "Alice")
         return Ctx(GroupModelIdentity(model = user, groups = listOf("admins", "users")))
     }
+
 
     val mcpServer = createMcpServer(klerk, ::contextProvider, "TODO application", "1.0.0")
     embeddedServer(Netty, port = 8080, host = "0.0.0.0") {
