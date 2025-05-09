@@ -8,8 +8,13 @@ URL="http://$HOST:$PORT$ENDPOINT"
 CONTENT_TYPE="application/json"
 AUTH_TOKEN="eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJBbGljZSIsImdyb3VwcyI6WyJhZG1pbnMiLCJ1c2VycyJdLCJpc3MiOiJ0b2RvLWFwcCIsImF1ZCI6InRvZG8tYXBwLXVzZXJzIiwiaWF0IjoxNzQ2Njk1NDQyLCJleHAiOjE3NDY3ODE4NDJ9.ntlcR2V5nKbOpCTPqWEAT2aiLOkdP0FbFudiXCApH-U"
 
-# Create data directory if it doesn't exist
+# Performance test configuration
+TOTAL_REQUESTS=10000    # Total number of requests to send
+CONCURRENCY=10         # Number of concurrent requests
+
+# Create directories if they don't exist
 mkdir -p ../build/test-data
+mkdir -p ../build/reports
 
 # Check if we have generated test data
 if [ ! "$(ls -A ../build/test-data 2>/dev/null)" ]; then
@@ -17,18 +22,31 @@ if [ ! "$(ls -A ../build/test-data 2>/dev/null)" ]; then
     kotlin generate-test-data.kts
 fi
 
-# Function to create a single todo
-create_todo() {
-    local file=$1
-    echo "Creating todo from $file..."
-    curl -s -X POST -H "Content-Type: $CONTENT_TYPE" -H "Authorization: Bearer $AUTH_TOKEN" -d @$file $URL
-    echo ""
-}
+# Select a single TODO file for testing
+TEST_FILE="../build/test-data/todo-0.json"
 
-# Create todos from all generated files
-echo "Creating multiple todos with different payloads..."
-for file in ../build/test-data/*.json; do
-    create_todo "$file"
-done
+# Make sure the test file exists
+if [ ! -f "$TEST_FILE" ]; then
+    echo "Error: Test file $TEST_FILE not found!"
+    exit 1
+fi
 
-echo "All todos created!"
+echo "=== Running benchmark test ==="
+echo "URL: $URL"
+echo "Sending $TOTAL_REQUESTS requests with concurrency $CONCURRENCY"
+echo "Using test file: $TEST_FILE"
+echo ""
+
+# Run the benchmark test
+ab -n $TOTAL_REQUESTS -c $CONCURRENCY -p "$TEST_FILE" -T "$CONTENT_TYPE" \
+   -H "Authorization: Bearer $AUTH_TOKEN" \
+   -v 2 "$URL" > "../build/reports/benchmark-report.txt" 2>&1
+
+# Display a summary of the results
+echo ""
+echo "Benchmark completed!"
+echo ""
+echo "Summary of results:"
+grep -A 10 "Document Length" "../build/reports/benchmark-report.txt" | head -11
+echo ""
+echo "Full report saved to ../build/reports/benchmark-report.txt"
