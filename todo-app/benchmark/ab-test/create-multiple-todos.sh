@@ -6,11 +6,11 @@ PORT="8080"
 ENDPOINT="/api/todos"
 URL="http://$HOST:$PORT$ENDPOINT"
 CONTENT_TYPE="application/json"
-AUTH_TOKEN="eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJBbGljZSIsImdyb3VwcyI6WyJhZG1pbnMiLCJ1c2VycyJdLCJpc3MiOiJ0b2RvLWFwcCIsImF1ZCI6InRvZG8tYXBwLXVzZXJzIiwiaWF0IjoxNzQ2Njk1NDQyLCJleHAiOjE3NDY3ODE4NDJ9.ntlcR2V5nKbOpCTPqWEAT2aiLOkdP0FbFudiXCApH-U"
+AUTH_TOKEN="eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJBbGljZSIsImdyb3VwcyI6WyJhZG1pbnMiLCJ1c2VycyJdLCJpc3MiOiJ0b2RvLWFwcCIsImF1ZCI6InRvZG8tYXBwLXVzZXJzIiwiaWF0IjoxNzQ2Nzk2NTYxLCJleHAiOjE3NDY4ODI5NjF9.QwsYNLhNfrpIMLQ1bV2qWOujyLc9pI-vg1RJzR34c2M"
 
 # Performance test configuration
 TOTAL_REQUESTS=10000    # Total number of requests to send
-CONCURRENCY=10         # Number of concurrent requests
+CONCURRENCY=1         # Number of concurrent requests
 
 # Create directories if they don't exist
 mkdir -p ../build/test-data
