@@ -21,6 +21,7 @@ import se.moshicon.klerkframework.todo_app.http.configureHttpRouting
 import se.moshicon.klerkframework.todo_app.http.findOrCreateUser
 import se.moshicon.klerkframework.todo_app.notes.*
 import se.moshicon.klerkframework.todo_app.users.*
+import kotlin.time.measureTime
 
 fun main() {
     val klerk = Klerk.create(createConfig())
@@ -30,29 +31,57 @@ fun main() {
     }
 
     // Simple performance test
+//    runBlocking {
+//        val aliceUser = klerk.read(Ctx(AuthenticationIdentity)) {
+//            getFirstWhere(data.users.all) { it.props.name.value == "Alice" }
+//        }
+//
+//        for (i in 0 until 10) {
+//            val context = Ctx(GroupModelIdentity(model = aliceUser, groups = listOf("admins", "users")))
+//            val command = Command(
+//                event = CreateTodo,
+//                model = null,
+//                params = CreateTodoParams(
+//                    title = TodoTitle("test Title"),
+//                    description = TodoDescription("test desc"),
+//                    username = UserName("Alice"),
+//                    priority = TodoPriority(4),
+//                ),
+//            )
+//            val result = klerk.handle(command, context, ProcessingOptions(CommandToken.simple()))
+//        }
+//    }
+
     runBlocking {
         val aliceUser = klerk.read(Ctx(AuthenticationIdentity)) {
             getFirstWhere(data.users.all) { it.props.name.value == "Alice" }
         }
-
-        for (i in 0 until 1000) {
-            val context = Ctx(GroupModelIdentity(model = aliceUser, groups = listOf("admins", "users")))
-            val command = Command(
-                event = CreateTodo,
-                model = null,
-                params = CreateTodoParams(
-                    title = TodoTitle("test Title"),
-                    description = TodoDescription("test desc"),
-                    username = UserName("Alice"),
-                    priority = TodoPriority(4),
-                ),
-            )
-            val result = klerk.handle(command, context, ProcessingOptions(CommandToken.simple()))
+        val totalTime = measureTime {
+            for (j in 0 until 100) {
+                val seconds = measureTime {
+                    for (i in 0 until 10000) {
+                        val context = Ctx(GroupModelIdentity(model = aliceUser, groups = listOf("admins", "users")))
+                        val command = Command(
+                            event = CreateTodo,
+                            model = null,
+                            params = CreateTodoParams(
+                                title = TodoTitle("test Title"),
+                                description = TodoDescription("test desc"),
+                                username = UserName("Alice"),
+                                priority = TodoPriority(4),
+                            ),
+                        )
+                        val result = klerk.handle(command, context, ProcessingOptions(CommandToken.simple()))
 //            println(result)
 //            delay(1)
-        }
-    }
+                    }
+                }.inWholeSeconds
+                println("10000 commands took $seconds seconds")
+            }
+        }.inWholeSeconds
+        println("100 iterations of 10000 commands took $totalTime seconds")
 
+    }
 
     suspend fun contextProvider(command: Command<*, *>?): Ctx {
         val user = findOrCreateUser(klerk, "Alice")

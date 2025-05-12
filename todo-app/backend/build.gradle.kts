@@ -5,6 +5,7 @@ val logback_version: String by project
 val sqlite_jdbc_version: String by project
 val coroutinesVersion: String by project
 val jwt_version: String by project
+val commons_dbcp2_version = "2.11.0"
 
 
 plugins {
@@ -26,6 +27,8 @@ dependencies {
     implementation("com.github.klerk-framework:klerk-web:$klerk_web_version")
     implementation("ch.qos.logback:logback-classic:$logback_version")
     implementation("org.xerial:sqlite-jdbc:$sqlite_jdbc_version")
+    implementation("org.mariadb.jdbc:mariadb-java-client:3.3.1")
+    implementation("org.apache.commons:commons-dbcp2:$commons_dbcp2_version")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutinesVersion")
 
     implementation("io.ktor:ktor-server-core-jvm:$ktor_version")
