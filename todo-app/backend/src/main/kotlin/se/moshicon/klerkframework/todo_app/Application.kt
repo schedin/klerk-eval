@@ -30,6 +30,56 @@ fun main() {
         createInitialUsers(klerk)
     }
 
+//    performanceTest(klerk)
+
+    suspend fun contextProvider(command: Command<*, *>?): Ctx {
+        val user = findOrCreateUser(klerk, "Alice")
+        return Ctx(GroupModelIdentity(model = user, groups = listOf("admins", "users")))
+    }
+
+
+    val mcpServer = createMcpServer(klerk, ::contextProvider, "TODO application", "1.0.0")
+    embeddedServer(Netty, port = 8080, host = "0.0.0.0") {
+        // Configure CORS to allow frontend requests
+        install(CORS) {
+            allowMethod(HttpMethod.Options)
+            allowMethod(HttpMethod.Get)
+            allowMethod(HttpMethod.Post)
+            allowMethod(HttpMethod.Put)
+            allowMethod(HttpMethod.Delete)
+            allowMethod(HttpMethod.Patch)
+            allowHeader(HttpHeaders.Authorization)
+            allowHeader(HttpHeaders.ContentType)
+            allowHeader(HttpHeaders.AccessControlAllowOrigin)
+            allowCredentials = true
+            anyHost() // For development only - restrict in production
+        }
+
+        // Configure JSON serialization
+        install(ContentNegotiation) {
+            json()
+        }
+        configureHttpRouting(klerk)
+
+//        install(SSE)
+//        routing {
+//            route("myRoute") {
+//                mcp {
+//                    getMcpServer()
+//                }
+//            }
+//        }
+        //Due do a bug in kotlin-sdk for MCP (https://github.com/modelcontextprotocol/kotlin-sdk/issues/94) it is
+        // currently not possible to control the URL for the MCP server.
+        mcp {
+            mcpServer
+        }
+
+
+    }.start(wait = true)
+}
+
+fun performanceTest(klerk: Klerk<Ctx, Data>) {
     // Simple performance test
 //    runBlocking {
 //        val aliceUser = klerk.read(Ctx(AuthenticationIdentity)) {
@@ -82,51 +132,4 @@ fun main() {
         println("100 iterations of 10000 commands took $totalTime seconds")
 
     }
-
-    suspend fun contextProvider(command: Command<*, *>?): Ctx {
-        val user = findOrCreateUser(klerk, "Alice")
-        return Ctx(GroupModelIdentity(model = user, groups = listOf("admins", "users")))
-    }
-
-
-    val mcpServer = createMcpServer(klerk, ::contextProvider, "TODO application", "1.0.0")
-    embeddedServer(Netty, port = 8080, host = "0.0.0.0") {
-        // Configure CORS to allow frontend requests
-        install(CORS) {
-            allowMethod(HttpMethod.Options)
-            allowMethod(HttpMethod.Get)
-            allowMethod(HttpMethod.Post)
-            allowMethod(HttpMethod.Put)
-            allowMethod(HttpMethod.Delete)
-            allowMethod(HttpMethod.Patch)
-            allowHeader(HttpHeaders.Authorization)
-            allowHeader(HttpHeaders.ContentType)
-            allowHeader(HttpHeaders.AccessControlAllowOrigin)
-            allowCredentials = true
-            anyHost() // For development only - restrict in production
-        }
-
-        // Configure JSON serialization
-        install(ContentNegotiation) {
-            json()
-        }
-        configureHttpRouting(klerk)
-
-//        install(SSE)
-//        routing {
-//            route("myRoute") {
-//                mcp {
-//                    getMcpServer()
-//                }
-//            }
-//        }
-        //Due do a bug in kotlin-sdk for MCP (https://github.com/modelcontextprotocol/kotlin-sdk/issues/94) it is
-        // currently not possible to control the URL for the MCP server.
-        mcp {
-            mcpServer
-        }
-
-
-    }.start(wait = true)
 }
-

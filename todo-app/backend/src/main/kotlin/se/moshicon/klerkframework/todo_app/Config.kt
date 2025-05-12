@@ -35,9 +35,9 @@ fun createConfig() = ConfigBuilder<Ctx, Data>(Data).build {
         model(Todo::class, todoStateMachine, Data.todos)
         model(User::class, userStateMachine, Data.users)
     }
-    persistence(createMariaDbPersistence())
+//    persistence(createMariaDbPersistence())
 //    persistence(createMariaDbPersistenceWithoutConnectionPool())
-//    persistence(createPersistence())
+    persistence(createPersistence())
     contextProvider { actor -> Ctx(actor) }
 }
 
