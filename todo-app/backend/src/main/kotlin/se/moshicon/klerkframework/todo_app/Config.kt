@@ -35,7 +35,8 @@ fun createConfig() = ConfigBuilder<Ctx, Data>(Data).build {
         model(Todo::class, todoStateMachine, Data.todos)
         model(User::class, userStateMachine, Data.users)
     }
-    persistence(createMariaPersistence())
+    persistence(createMariaDbPersistence())
+//    persistence(createMariaDbPersistenceWithoutConnectionPool())
 //    persistence(createPersistence())
     contextProvider { actor -> Ctx(actor) }
 }
@@ -55,7 +56,15 @@ private fun createPersistence(): Persistence {
 
 private val logger = LoggerFactory.getLogger("se.moshicon.klerkframework.todo_app.Config")
 
-private fun createMariaPersistence(): Persistence {
+private fun createMariaDbPersistenceWithoutConnectionPool(): Persistence {
+    val ds = MariaDbDataSource()
+    ds.setUrl("jdbc:mariadb://localhost:3306/klerk-todo")
+    ds.user = "root"
+    ds.setPassword("")
+    return SqlPersistence(ds)
+}
+
+private fun createMariaDbPersistence(): Persistence {
     logger.info("Setting up MariaDB connection pool")
 
     val dataSource = BasicDataSource().apply {
