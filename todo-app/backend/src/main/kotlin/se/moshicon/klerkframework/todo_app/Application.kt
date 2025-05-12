@@ -14,14 +14,16 @@ import io.ktor.serialization.kotlinx.json.*
 import io.ktor.server.application.*
 import io.ktor.http.*
 import io.modelcontextprotocol.kotlin.sdk.server.mcp
-import kotlinx.coroutines.delay
 
 import kotlinx.coroutines.runBlocking
+import org.slf4j.LoggerFactory
 import se.moshicon.klerkframework.todo_app.http.configureHttpRouting
 import se.moshicon.klerkframework.todo_app.http.findOrCreateUser
 import se.moshicon.klerkframework.todo_app.notes.*
 import se.moshicon.klerkframework.todo_app.users.*
 import kotlin.time.measureTime
+
+private val logger = LoggerFactory.getLogger(Application::class.java.name)
 
 fun main() {
     val klerk = Klerk.create(createConfig())
@@ -30,13 +32,12 @@ fun main() {
         createInitialUsers(klerk)
     }
 
-//    performanceTest(klerk)
+//    performanceInsertTest(klerk)
 
     suspend fun contextProvider(command: Command<*, *>?): Ctx {
         val user = findOrCreateUser(klerk, "Alice")
         return Ctx(GroupModelIdentity(model = user, groups = listOf("admins", "users")))
     }
-
 
     val mcpServer = createMcpServer(klerk, ::contextProvider, "TODO application", "1.0.0")
     embeddedServer(Netty, port = 8080, host = "0.0.0.0") {
@@ -79,7 +80,9 @@ fun main() {
     }.start(wait = true)
 }
 
-fun performanceTest(klerk: Klerk<Ctx, Data>) {
+fun performanceInsertTest(klerk: Klerk<Ctx, Data>) {
+    logger.info("Starting performance insert test...")
+
     // Simple performance test
 //    runBlocking {
 //        val aliceUser = klerk.read(Ctx(AuthenticationIdentity)) {
